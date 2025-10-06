@@ -8,5 +8,20 @@
     <h1>Bienvenido, {{ user.username }} (Ciudadano)</h1>
     <p>Aquí podrás reportar incidentes o subir evidencias.</p>
     <a href="{% url 'logout' %}">Cerrar sesión</a>
+
+    <p>
+    <a href="/reportes/mis_reportes/" 
+       style="background-color:#007bff; color:white; padding:10px 15px; border-radius:5px; text-decoration:none;">
+        Ver mis reportes
+    </a>
+</p>
+
+<p>
+    <a href="/reportes/crear/" 
+       style="background-color:#28a745; color:white; padding:10px 15px; border-radius:5px; text-decoration:none;">
+        Crear nuevo reporte
+    </a>
+</p>
+
 </body>
 </html>

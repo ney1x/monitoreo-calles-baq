@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nuevo Reporte</title>
+</head>
+<body>
+    <h2>Crear nuevo reporte</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Enviar reporte</button>
+    </form>
+</body>
+</html>

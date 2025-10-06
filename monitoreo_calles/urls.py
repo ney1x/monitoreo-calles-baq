@@ -20,7 +20,7 @@ from django.shortcuts import redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', lambda request: redirect('login')), 
+    path('reportes/', include('reportes.urls')),
     path('', include('usuarios.urls')),
 ]
 

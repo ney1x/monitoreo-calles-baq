@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mis reportes</title>
+</head>
+<body>
+    <h2>Mis reportes enviados</h2>
+
+    {% if reportes %}
+        <table border="1" cellpadding="6">
+            <tr>
+                <th>Tipo</th>
+                <th>Descripción</th>
+                <th>Dirección</th>
+                <th>Fecha</th>
+                <th>Foto</th>
+                <th>Video</th>
+            </tr>
+            {% for reporte in reportes %}
+                <tr>
+                    <td>{{ reporte.get_tipo_display }}</td>
+                    <td>{{ reporte.descripcion }}</td>
+                    <td>{{ reporte.direccion }}</td>
+                    <td>{{ reporte.fecha|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        {% if reporte.foto %}
+                            <a href="{{ reporte.foto.url }}" target="_blank">Ver foto</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if reporte.video %}
+                            <a href="{{ reporte.video.url }}" target="_blank">Ver video</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No has enviado ningún reporte todavía.</p>
+    {% endif %}
+
+    <br>
+    <a href="/reportes/crear/">Crear nuevo reporte</a>
+</body>
+</html>
