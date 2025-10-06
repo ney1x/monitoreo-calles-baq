@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ciudadano</title>
+</head>
+<body>
+    <h1>Bienvenido, {{ user.username }} (Ciudadano)</h1>
+    <p>Aquí podrás reportar incidentes o subir evidencias.</p>
+    <a href="{% url 'logout' %}">Cerrar sesión</a>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Técnico</title>
+</head>
+<body>
+    <h1>Bienvenido, {{ user.username }} (Técnico)</h1>
+    <p>Aquí podrás validar reportes y revisar puntos en el mapa.</p>
+    <a href="{% url 'logout' %}">Cerrar sesión</a>
+</body>
+</html>
