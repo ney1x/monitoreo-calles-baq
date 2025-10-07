@@ -1,27 +1,140 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Ciudadano</title>
+  <meta charset="UTF-8">
+  <title>Inicio Ciudadano | Monitoreo de Calles</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: url("https://img.freepik.com/fotos-premium/toma-primer-plano-mapa-ciudad-nueva-york-marcador-rojo-colocado-parte-superior-identificar-ubicacion-especifica-representacion-navegacion-gps-estilo-minimalista-limpio-generado-ia_538213-39716.jpg")
+        no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Capa semitransparente */
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(3px);
+    }
+
+    .container {
+      position: relative;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 20px;
+      padding: 45px 60px;
+      width: 430px;
+      text-align: center;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      color: #fff;
+      backdrop-filter: blur(10px);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      color: #ffffff;
+      margin-bottom: 12px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    p {
+      color: #e0e0e0;
+      font-size: 15px;
+      margin-bottom: 35px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .menu a {
+      text-decoration: none;
+      background-color: #1565c0;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .menu a:hover {
+      background-color: #1e88e5;
+      transform: translateY(-3px);
+    }
+
+    /* Botón pequeño para cerrar sesión */
+    .logout-btn {
+      background-color: rgba(255, 255, 255, 0.85);
+      color: #333;
+      font-weight: 500;
+      padding: 10px 15px;
+      font-size: 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.3s;
+      display: inline-block;
+      margin-top: 15px;
+    }
+
+    .logout-btn:hover {
+      background-color: #eeeeee;
+      transform: translateY(-1px);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 12px;
+      font-size: 13px;
+      color: #fff;
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    }
+  </style>
 </head>
+
 <body>
+  <div class="container">
     <h1>Bienvenido, {{ user.username }} (Ciudadano)</h1>
     <p>Aquí podrás reportar incidentes o subir evidencias.</p>
-    <a href="{% url 'logout' %}">Cerrar sesión</a>
 
-    <p>
-    <a href="/reportes/mis_reportes/" 
-       style="background-color:#007bff; color:white; padding:10px 15px; border-radius:5px; text-decoration:none;">
-        Ver mis reportes
-    </a>
-</p>
+    <div class="menu">
+      <a href="{% url 'mis_reportes' %}">Ver mis reportes</a>
+      <a href="{% url 'crear_reporte' %}">Crear nuevo reporte</a>
+    </div>
 
-<p>
-    <a href="/reportes/crear/" 
-       style="background-color:#28a745; color:white; padding:10px 15px; border-radius:5px; text-decoration:none;">
-        Crear nuevo reporte
-    </a>
-</p>
+    <a href="{% url 'logout' %}" class="logout-btn">Cerrar sesión</a>
+  </div>
 
+  <footer>© 2025 Monitoreo de Calles | Barranquilla</footer>
 </body>
 </html>
