@@ -21,27 +21,37 @@ def login_view(request):
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
+
             user = authenticate(username=username, password=password)
+
             if user is not None:
                 login(request, user)
+
+                # REGISTRA LA FECHA DE INICIO DE SESIÓN
+                user.registrar_inicio_sesion()
+
                 messages.success(request, f"Bienvenido, {username}.")
-                
-                # Redirección según el rol
-                if user.rol == 'ciudadano':
+
+                # REDIRECCIÓN CORRECTA SEGÚN ROLES DEL MODELO
+                if user.rol == 'CIUDADANO':
                     return redirect('ciudadano_home')
-                elif user.rol == 'tecnico':
+                elif user.rol == 'TECNICO':
                     return redirect('tecnico_home')
-                elif user.rol == 'autoridad':
+                elif user.rol == 'AUTORIDAD':
                     return redirect('autoridad_home')
-                else:
-                    return redirect('login')
+                elif user.rol == 'ADMIN':
+                    return redirect('/admin/')  # Admin → Panel de administración
+
+                return redirect('login')  # fallback
             else:
                 messages.error(request, "Credenciales inválidas.")
         else:
             messages.error(request, "Error en el formulario.")
     else:
         form = LoginForm()
+
     return render(request, 'usuarios/login.html', {'form': form})
+
 
 def logout_view(request):
     logout(request)
