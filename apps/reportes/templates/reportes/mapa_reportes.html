@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mapa de Reportes - Monitoreo Calles BAQ{% endblock %}
+
+{% block main_class %}container-fluid{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar con filtros -->
+    <div class="col-lg-3 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtros</h5>
+            </div>
+            <div class="card-body">
+                <!-- Filtro por Estado -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Estado</label>
+                    <select class="form-select" id="filtroEstado" onchange="aplicarFiltrosMapa()">
+                        <option value="">Todos</option>
+                        <option value="Nuevo">Nuevo</option>
+                        <option value="En Revisión">En Revisión</option>
+                        <option value="Asignado">Asignado</option>
+                        <option value="En Proceso">En Proceso</option>
+                        <option value="Resuelto">Resuelto</option>
+                        <option value="Rechazado">Rechazado</option>
+                    </select>
+                </div>
+
+                <!-- Filtro por Prioridad -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Prioridad</label>
+                    <select class="form-select" id="filtroPrioridad" onchange="aplicarFiltrosMapa()">
+                        <option value="">Todas</option>
+                        <option value="Baja">Baja</option>
+                        <option value="Media">Media</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Crítica">Crítica</option>
+                    </select>
+                </div>
+
+                <!-- Filtro por Tipo -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tipo de Falla</label>
+                    <select class="form-select" id="filtroTipo" onchange="aplicarFiltrosMapa()">
+                        <option value="">Todos</option>
+                        <option value="bache">Bache o hueco</option>
+                        <option value="fisura">Fisura o grieta</option>
+                        <option value="hundimiento">Hundimiento de vía</option>
+                        <option value="desprendimiento">Desprendimiento</option>
+                        <option value="inundacion">Inundación</option>
+                        <option value="obstruccion">Obstrucción</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-secondary w-100" onclick="limpiarFiltrosMapa()">
+                    <i class="bi bi-x-circle"></i> Limpiar Filtros
+                </button>
+            </div>
+        </div>
+
+        <!-- Leyenda -->
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Leyenda</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-geo-alt-fill text-danger me-2" style="font-size: 1.5rem;"></i>
+                    <small>Crítica</small>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-geo-alt-fill text-warning me-2" style="font-size: 1.5rem;"></i>
+                    <small>Alta</small>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-geo-alt-fill text-info me-2" style="font-size: 1.5rem;"></i>
+                    <small>Media</small>
+                </div>
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-geo-alt-fill text-secondary me-2" style="font-size: 1.5rem;"></i>
+                    <small>Baja</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa -->
+    <div class="col-lg-9">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    #map {
+        height: calc(100vh - 150px);
+        min-height: 600px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Datos de reportes desde Django
+    const reportesData = [
+        {% for reporte in reportes %}
+        {
+            id: {{ reporte.id }},
+            lat: {{ reporte.latitud }},
+            lng: {{ reporte.longitud }},
+            titulo: "{{ reporte.titulo|escapejs }}",
+            descripcion: "{{ reporte.descripcion|truncatewords:20|escapejs }}",
+            estado: "{{ reporte.estado.nombre|default:'Sin estado' }}",
+            prioridad: "{{ reporte.prioridad.nombre|default:'Sin prioridad' }}",
+            tipo: "{{ reporte.tipo }}",
+            direccion: "{{ reporte.direccion|escapejs }}",
+            fecha: "{{ reporte.reportado_en|date:'d/m/Y H:i' }}",
+            url: "{% url 'reportes:detalle_reporte' reporte.pk %}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    // Inicializar mapa
+    const map = L.map('map').setView([10.9639, -74.7964], 12); // Barranquilla
+
+    // Añadir capa de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Cluster group para agrupar marcadores cercanos
+    const markers = L.markerClusterGroup({
+        chunkedLoading: true,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false
+    });
+
+    let todosLosMarcadores = [];
+
+    // Función para obtener color según prioridad
+    function getColorByPriority(prioridad) {
+        switch(prioridad) {
+            case 'Crítica': return '#dc3545'; // Rojo
+            case 'Alta': return '#ffc107';    // Amarillo/Naranja
+            case 'Media': return '#0dcaf0';   // Azul claro
+            case 'Baja': return '#6c757d';    // Gris
+            default: return '#0d6efd';        // Azul
+        }
+    }
+
+    // Función para obtener icono personalizado
+    function getCustomIcon(prioridad) {
+        const color = getColorByPriority(prioridad);
+        return L.divIcon({
+            html: `<i class="bi bi-geo-alt-fill" style="color: ${color}; font-size: 2rem;"></i>`,
+            className: 'custom-marker',
+            iconSize: [30, 30],
+            iconAnchor: [15, 30]
+        });
+    }
+
+    // Crear marcadores
+    reportesData.forEach(reporte => {
+        const icon = getCustomIcon(reporte.prioridad);
+        
+        const marker = L.marker([reporte.lat, reporte.lng], { icon: icon });
+        
+        // Popup con información
+        const popupContent = `
+            <div style="min-width: 250px;">
+                <h6 class="mb-2"><strong>${reporte.titulo}</strong></h6>
+                <p class="mb-1 small">${reporte.descripcion}</p>
+                <hr class="my-2">
+                <p class="mb-1 small">
+                    <i class="bi bi-exclamation-circle"></i> 
+                    <strong>Prioridad:</strong> 
+                    <span class="badge badge-prioridad-${reporte.prioridad.toLowerCase()}">${reporte.prioridad}</span>
+                </p>
+                <p class="mb-1 small">
+                    <i class="bi bi-clock"></i> 
+                    <strong>Estado:</strong> 
+                    <span class="badge badge-estado-${reporte.estado.toLowerCase().replace(' ', '-')}">${reporte.estado}</span>
+                </p>
+                <p class="mb-1 small">
+                    <i class="bi bi-geo-alt"></i> ${reporte.direccion}
+                </p>
+                <p class="mb-2 small text-muted">
+                    <i class="bi bi-calendar"></i> ${reporte.fecha}
+                </p>
+                <a href="${reporte.url}" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-eye"></i> Ver Detalles
+                </a>
+            </div>
+        `;
+        
+        marker.bindPopup(popupContent);
+        
+        // Guardar datos para filtrado
+        marker.reporteData = reporte;
+        todosLosMarcadores.push(marker);
+        markers.addLayer(marker);
+    });
+
+    map.addLayer(markers);
+
+    // Función para aplicar filtros
+    function aplicarFiltrosMapa() {
+        const estadoFiltro = document.getElementById('filtroEstado').value;
+        const prioridadFiltro = document.getElementById('filtroPrioridad').value;
+        const tipoFiltro = document.getElementById('filtroTipo').value;
+
+        markers.clearLayers();
+
+        todosLosMarcadores.forEach(marker => {
+            const data = marker.reporteData;
+            
+            const cumpleEstado = !estadoFiltro || data.estado === estadoFiltro;
+            const cumplePrioridad = !prioridadFiltro || data.prioridad === prioridadFiltro;
+            const cumpleTipo = !tipoFiltro || data.tipo === tipoFiltro;
+
+            if (cumpleEstado && cumplePrioridad && cumpleTipo) {
+                markers.addLayer(marker);
+            }
+        });
+    }
+
+    // Función para limpiar filtros
+    function limpiarFiltrosMapa() {
+        document.getElementById('filtroEstado').value = '';
+        document.getElementById('filtroPrioridad').value = '';
+        document.getElementById('filtroTipo').value = '';
+        aplicarFiltrosMapa();
+    }
+
+    // Añadir control de ubicación
+    map.locate({setView: false, maxZoom: 16});
+
+    map.on('locationfound', function(e) {
+        L.circle(e.latlng, {
+            radius: e.accuracy,
+            color: '#0d6efd',
+            fillColor: '#0d6efd',
+            fillOpacity: 0.2
+        }).addTo(map);
+        
+        L.marker(e.latlng, {
+            icon: L.divIcon({
+                html: '<i class="bi bi-person-fill" style="color: #0d6efd; font-size: 2rem;"></i>',
+                className: 'custom-marker',
+                iconSize: [30, 30]
+            })
+        }).addTo(map).bindPopup("Tu ubicación").openPopup();
+    });
+</script>
+
+<!-- Leaflet MarkerCluster Plugin -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+{% endblock %}

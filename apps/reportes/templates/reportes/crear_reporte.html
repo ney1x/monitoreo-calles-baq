@@ -1,0 +1,16 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Crear Reporte{% endblock %}
+
+{% block content %}
+<div class='container mt-4'>
+<h2>Crear Reporte</h2>
+<form method='post' enctype='multipart/form-data'>
+{% csrf_token %}
+{{ form.as_p }}
+<button type='submit' class='btn btn-primary'>Crear</button>
+<a href='{% url 'reportes:mis_reportes' %}' class='btn btn-secondary'>Cancelar</a>
+</form>
+</div>
+{% endblock %}
