@@ -17,22 +17,22 @@ def crear_reporte(request):
             reporte = form.save(commit=False)
             reporte.usuario = request.user
             
-            # Asignar estado inicial "Nuevo" automáticamente
+            # SE Asignar estado inicial "Nuevo" automáticamente
             estado_nuevo = EstadoReporte.objects.filter(nombre='Nuevo').first()
             if estado_nuevo:
                 reporte.estado = estado_nuevo
             
-            # Asignar prioridad por defecto "Media"
+            # SE Asignar prioridad por defecto "Media"
             prioridad_media = PrioridadReporte.objects.filter(nombre='Media').first()
             if prioridad_media:
                 reporte.prioridad = prioridad_media
             
             reporte.save()
             
-            # Procesar archivo de evidencia si se subió
+            # SE Procesar archivo de evidencia si se subió
             archivo_evidencia = request.FILES.get('evidencia')
             if archivo_evidencia:
-                # Determinar tipo de evidencia
+                # SE Determinar tipo de evidencia
                 extension = os.path.splitext(archivo_evidencia.name)[1].lower()
                 if extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']:
                     tipo = 'foto'
@@ -41,7 +41,7 @@ def crear_reporte(request):
                 else:
                     tipo = 'documento'
                 
-                # Crear registro de evidencia
+                # SE Crear registro de evidencia
                 evidencia = Evidencia(
                     reporte=reporte,
                     tipo_evidencia=tipo,
@@ -83,7 +83,7 @@ def detalle_reporte(request, pk):
     """Vista para ver el detalle de un reporte"""
     reporte = get_object_or_404(Reporte, pk=pk)
     
-    # Verificar que el usuario sea el dueño o staff
+    # SE Verificar que el usuario sea el dueño o staff
     if reporte.usuario != request.user and not request.user.is_staff:
         messages.error(request, 'No tienes permiso para ver este reporte.')
         return redirect('reportes:mis_reportes')
@@ -98,7 +98,7 @@ def agregar_evidencia(request, pk):
     """Vista para agregar evidencias a un reporte existente"""
     reporte = get_object_or_404(Reporte, pk=pk)
     
-    # Verificar que el usuario sea el dueño
+    # SE Verificar que el usuario sea el dueño
     if reporte.usuario != request.user:
         messages.error(request, 'No tienes permiso para agregar evidencias a este reporte.')
         return redirect('reportes:mis_reportes')
@@ -125,7 +125,7 @@ def lista_reportes(request):
     """Vista pública de todos los reportes con filtros"""
     reportes = Reporte.objects.all().order_by('-reportado_en')
     
-    # Filtros
+    # SE Filtros
     busqueda = request.GET.get('q', '')
     estado = request.GET.get('estado', '')
     prioridad = request.GET.get('prioridad', '')
@@ -143,12 +143,12 @@ def lista_reportes(request):
     if prioridad:
         reportes = reportes.filter(prioridad__nombre=prioridad)
     
-    # Paginación
-    paginator = Paginator(reportes, 12)  # 12 reportes por página
+    # SE Paginación
+    paginator = Paginator(reportes, 12)
     page = request.GET.get('page')
     reportes_page = paginator.get_page(page)
     
-    # Obtener listas para filtros
+    # SE Obtener listas para filtros
     estados = EstadoReporte.objects.all()
     prioridades = PrioridadReporte.objects.all()
     

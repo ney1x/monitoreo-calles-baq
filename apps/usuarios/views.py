@@ -34,12 +34,12 @@ def login_view(request):
             if user is not None:
                 login(request, user)
 
-                # REGISTRA LA FECHA DE INICIO DE SESIÓN
+                # SE Registra la fecha de inicio de sesión
                 user.registrar_inicio_sesion()
 
                 messages.success(request, f"Bienvenido, {username}.")
 
-                # REDIRECCIÓN CORRECTA SEGÚN ROLES DEL MODELO
+                # SE Redirección correcta según roles del modelo
                 if user.rol:
                     rol_nombre = user.rol.nombre
                     if rol_nombre == 'Ciudadano':
@@ -51,11 +51,11 @@ def login_view(request):
                     elif rol_nombre == 'Administrador':
                         return redirect('/admin/')
                 
-                # Si es staff sin rol específico
+                # SE Si es staff sin rol específico
                 if user.is_staff:
                     return redirect('/admin/')
                 
-                # Fallback a ciudadano
+                # SE Fallback a ciudadano
                 return redirect('usuarios:ciudadano_home')
             else:
                 messages.error(request, "Credenciales inválidas.")
@@ -75,7 +75,7 @@ def logout_view(request):
 
 def home(request):
     """Vista principal - muestra landing page o redirige según rol"""
-    # Si está autenticado Y tiene un parámetro especial, mostrar landing de todos modos
+    # SE Si está autenticado y tiene un parámetro especial, mostrar landing de todos modos
     if request.GET.get('public'):
         reportes_count = Reporte.objects.count()
         return render(request, 'home.html', {
@@ -84,7 +84,7 @@ def home(request):
         })
     
     if request.user.is_authenticated:
-        # Redirigir según rol
+        # SE Redirigir según rol
         if request.user.rol:
             rol_nombre = request.user.rol.nombre
             if rol_nombre == 'Ciudadano':
@@ -94,23 +94,25 @@ def home(request):
             elif rol_nombre == 'Autoridad':
                 return redirect('usuarios:autoridad_home')
             elif rol_nombre == 'Administrador':
-                return redirect('usuarios:autoridad_home')  # Admin ve dashboard de autoridad
+                return redirect('usuarios:autoridad_home')
         
-        # Si es staff sin rol, ir a admin
+        # SE Si es staff sin rol, ir a admin
         if request.user.is_staff:
-            return redirect('usuarios:autoridad_home')  # Dashboard en lugar de /admin/
+            return redirect('usuarios:autoridad_home')
         
-        # Fallback a ciudadano
+        # SE Fallback a ciudadano
         return redirect('usuarios:ciudadano_home')
     
-    # Mostrar landing page para usuarios no autenticados
+    # SE Mostrar landing page para usuarios no autenticados
     reportes_count = Reporte.objects.count()
     return render(request, 'home.html', {
         'reportes_count': reportes_count
     })
 
 
-# Vistas por rol
+# SE ==================================================
+# SE VISTAS POR ROL
+# SE ==================================================
 @login_required
 def ciudadano_home(request):
     """Dashboard para ciudadanos"""
@@ -136,7 +138,7 @@ def ciudadano_home(request):
 @login_required
 def tecnico_home(request):
     """Dashboard para técnicos"""
-    # Reportes asignados a este técnico con conteo de evidencias
+    # SE Reportes asignados a este técnico con conteo de evidencias
     mis_asignaciones = Reporte.objects.filter(
         asignaciones__tecnico=request.user
     ).select_related('estado', 'prioridad').annotate(
@@ -169,7 +171,7 @@ def autoridad_home(request):
     from django.utils import timezone
     from datetime import timedelta
     
-    # Estadísticas generales
+    # SE Estadísticas generales
     estadisticas = {
         'total': Reporte.objects.count(),
         'sin_asignar': Reporte.objects.filter(asignaciones__isnull=True).count(),
@@ -177,17 +179,17 @@ def autoridad_home(request):
         'resueltos': Reporte.objects.filter(estado__nombre='Resuelto').count(),
     }
     
-    # Reportes recientes sin asignar
+    # SE Reportes recientes sin asignar
     reportes_recientes = Reporte.objects.filter(
         asignaciones__isnull=True
     ).select_related('usuario', 'estado', 'prioridad').order_by('-reportado_en')[:10]
     
-    # Reportes por tipo (tipo es CharField, no ForeignKey)
+    # SE Reportes por tipo (tipo es CharField, no ForeignKey)
     reportes_por_tipo = Reporte.objects.values('tipo').annotate(
         total=Count('id')
     ).order_by('-total')
     
-    # Reportes por prioridad (nivel_gravedad es IntegerField)
+    # SE Reportes por prioridad (nivel_gravedad es IntegerField)
     reportes_por_prioridad = Reporte.objects.values('prioridad__nivel_gravedad').annotate(
         total=Count('id')
     ).order_by('-total')
@@ -206,7 +208,7 @@ def perfil_view(request):
     """Vista del perfil del usuario"""
     context = {}
     
-    # Si es ciudadano, agregar estadísticas
+    # SE Si es ciudadano, agregar estadísticas
     if request.user.rol and request.user.rol.nombre == 'Ciudadano':
         from apps.reportes.models import Reporte
         reportes = Reporte.objects.filter(usuario=request.user)
@@ -248,26 +250,26 @@ def cambiar_password(request):
         new_password1 = request.POST.get('new_password1')
         new_password2 = request.POST.get('new_password2')
         
-        # Verificar contraseña actual
+        # SE Verificar contraseña actual
         if not request.user.check_password(old_password):
             messages.error(request, 'La contraseña actual es incorrecta.')
             return redirect('usuarios:perfil')
         
-        # Verificar que las nuevas contraseñas coincidan
+        # SE Verificar que las nuevas contraseñas coincidan
         if new_password1 != new_password2:
             messages.error(request, 'Las nuevas contraseñas no coinciden.')
             return redirect('usuarios:perfil')
         
-        # Validar longitud mínima
+        # SE Validar longitud mínima
         if len(new_password1) < 8:
             messages.error(request, 'La contraseña debe tener al menos 8 caracteres.')
             return redirect('usuarios:perfil')
         
-        # Cambiar contraseña
+        # SE Cambiar contraseña
         request.user.set_password(new_password1)
         request.user.save()
         
-        # Mantener la sesión activa
+        # SE Mantener la sesión activa
         update_session_auth_hash(request, request.user)
         
         messages.success(request, '¡Contraseña cambiada exitosamente!')
@@ -279,13 +281,13 @@ def cambiar_password(request):
 @login_required
 def notificaciones_view(request):
     """Vista de notificaciones del usuario"""
-    # Contar no leídas primero
+    # SE Contar no leídas primero
     no_leidas = Notificacion.objects.filter(
         usuario=request.user,
         leido=False
     ).count()
     
-    # Obtener últimas 50 notificaciones
+    # SE Obtener últimas 50 notificaciones
     notificaciones = Notificacion.objects.filter(
         usuario=request.user
     ).order_by('-enviado_en')[:50]
@@ -309,16 +311,16 @@ def marcar_notificaciones_leidas(request):
     return redirect('usuarios:notificaciones')
 
 
-# ============================================
-# VISTAS PARA TÉCNICOS
-# ============================================
+# SE ==================================================
+# SE VISTAS PARA TÉCNICOS
+# SE ==================================================
 
 @login_required
 def cambiar_estado_reporte(request, pk):
     """Permite al técnico cambiar el estado de un reporte asignado"""
     reporte = get_object_or_404(Reporte, pk=pk)
     
-    # Verificar que el técnico tenga este reporte asignado
+    # SE Verificar que el técnico tenga este reporte asignado
     if not Asignacion.objects.filter(reporte=reporte, tecnico=request.user).exists():
         messages.error(request, 'Este reporte no está asignado a ti.')
         return redirect('usuarios:tecnico_home')
@@ -329,12 +331,12 @@ def cambiar_estado_reporte(request, pk):
         
         nuevo_estado = get_object_or_404(EstadoReporte, id=nuevo_estado_id)
         
-        # Cambiar estado
+        # SE Cambiar estado
         estado_anterior = reporte.estado
         reporte.estado = nuevo_estado
         reporte.save()
         
-        # Registrar en historial
+        # SE Registrar en historial
         HistorialReporte.objects.create(
             reporte=reporte,
             usuario=request.user,
@@ -342,7 +344,7 @@ def cambiar_estado_reporte(request, pk):
             detalles=f'{estado_anterior.nombre} → {nuevo_estado.nombre}. Notas: {notas}'
         )
         
-        # Crear notificación para el ciudadano
+        # SE Crear notificación para el ciudadano
         Notificacion.objects.create(
             usuario=reporte.usuario,
             reporte=reporte,
@@ -366,7 +368,7 @@ def subir_evidencia_reparacion(request, pk):
     """Permite al técnico subir evidencia de la reparación"""
     reporte = get_object_or_404(Reporte, pk=pk)
     
-    # Verificar asignación
+    # SE Verificar asignación
     if not Asignacion.objects.filter(reporte=reporte, tecnico=request.user).exists():
         messages.error(request, 'No tienes permiso para subir evidencias a este reporte.')
         return redirect('usuarios:tecnico_home')
@@ -376,7 +378,7 @@ def subir_evidencia_reparacion(request, pk):
         notas = request.POST.get('notas', '')
         
         if archivo:
-            # Determinar tipo
+            # SE Determinar tipo
             if archivo.content_type.startswith('image'):
                 tipo = 'foto'
             elif archivo.content_type.startswith('video'):
@@ -384,7 +386,7 @@ def subir_evidencia_reparacion(request, pk):
             else:
                 tipo = 'documento'
             
-            # Crear evidencia
+            # SE Crear evidencia
             Evidencia.objects.create(
                 reporte=reporte,
                 tipo_evidencia=tipo,
@@ -393,7 +395,7 @@ def subir_evidencia_reparacion(request, pk):
                 tamano_bytes=archivo.size
             )
             
-            # Registrar en historial
+            # SE Registrar en historial
             HistorialReporte.objects.create(
                 reporte=reporte,
                 usuario=request.user,
@@ -411,15 +413,15 @@ def subir_evidencia_reparacion(request, pk):
     })
 
 
-# ============================================
-# VISTAS PARA AUTORIDADES
-# ============================================
+# SE ==================================================
+# SE VISTAS PARA AUTORIDADES
+# SE ==================================================
 
 @login_required
 def asignar_tecnico(request, pk):
     """Permite a la autoridad asignar un técnico a un reporte"""
     
-    # Verificar que sea autoridad o admin
+    # SE Verificar que sea autoridad o admin
     if request.user.rol.nombre not in ['Autoridad', 'Administrador']:
         messages.error(request, 'No tienes permisos para asignar técnicos.')
         return redirect('usuarios:home')
@@ -432,7 +434,7 @@ def asignar_tecnico(request, pk):
         
         tecnico = get_object_or_404(Usuario, id=tecnico_id)
         
-        # Crear asignación
+        # SE Crear asignación
         asignacion = Asignacion.objects.create(
             reporte=reporte,
             tecnico=tecnico,
@@ -440,12 +442,12 @@ def asignar_tecnico(request, pk):
             notas=notas
         )
         
-        # Cambiar estado a "Asignado"
+        # SE Cambiar estado a "Asignado"
         estado_asignado = EstadoReporte.objects.get(nombre='Asignado')
         reporte.estado = estado_asignado
         reporte.save()
         
-        # Registrar en historial
+        # SE Registrar en historial
         HistorialReporte.objects.create(
             reporte=reporte,
             usuario=request.user,
@@ -453,7 +455,7 @@ def asignar_tecnico(request, pk):
             detalles=f'Asignado a técnico: {tecnico.get_full_name() or tecnico.username}'
         )
         
-        # Notificar al técnico
+        # SE Notificar al técnico
         Notificacion.objects.create(
             usuario=tecnico,
             reporte=reporte,
@@ -464,7 +466,7 @@ def asignar_tecnico(request, pk):
         messages.success(request, f'Reporte asignado a {tecnico.username}')
         return redirect('usuarios:autoridad_home')
     
-    # Obtener solo técnicos
+    # SE Obtener solo técnicos
     tecnicos = Usuario.objects.filter(rol__nombre='Técnico', activo=True)
     
     return render(request, 'reportes/asignar_tecnico.html', {
@@ -481,12 +483,12 @@ def lista_reportes_autoridad(request):
         messages.error(request, 'No tienes permisos para ver esta página.')
         return redirect('usuarios:home')
     
-    # Obtener todos los reportes
+    # SE Obtener todos los reportes
     reportes = Reporte.objects.all().select_related(
         'usuario', 'estado', 'prioridad'
     ).prefetch_related('asignaciones__tecnico').order_by('-reportado_en')
     
-    # Filtros
+    # SE Filtros
     estado_filtro = request.GET.get('estado')
     prioridad_filtro = request.GET.get('prioridad')
     
@@ -496,7 +498,7 @@ def lista_reportes_autoridad(request):
     if prioridad_filtro:
         reportes = reportes.filter(prioridad__id=prioridad_filtro)
     
-    # Estadísticas
+    # SE Estadísticas
     total_reportes = Reporte.objects.count()
     sin_asignar = Reporte.objects.filter(asignaciones__isnull=True).count()
     en_proceso = Reporte.objects.filter(estado__nombre='En Proceso').count()

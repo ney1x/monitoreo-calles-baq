@@ -21,7 +21,7 @@ class Usuario(AbstractUser):
     Usuario extendido del sistema.
     Cumple con el diagrama: id, nombre, correo, contrasenaHash, telefono, rol, activo, creadoEn, ultimoInicioSesion
     """
-    # AbstractUser ya trae: username, email, password, first_name, last_name
+    # SE AbstractUser ya trae: username, email, password, first_name, last_name
     
     telefono = models.CharField(max_length=20, blank=True, null=True)
     
