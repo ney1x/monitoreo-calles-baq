@@ -105,8 +105,15 @@ def home(request):
     
     # SE Mostrar landing page para usuarios no autenticados
     reportes_count = Reporte.objects.count()
+    ciudadanos_count = Usuario.objects.filter(rol__nombre='Ciudadano').count()
+    casos_resueltos = Reporte.objects.filter(estado__nombre='Resuelto').count()
+    tecnicos_count = Usuario.objects.filter(rol__nombre='Técnico').count()
+    
     return render(request, 'home.html', {
-        'reportes_count': reportes_count
+        'reportes_count': reportes_count,
+        'ciudadanos_count': ciudadanos_count,
+        'casos_resueltos': casos_resueltos,
+        'tecnicos_count': tecnicos_count,
     })
 
 
