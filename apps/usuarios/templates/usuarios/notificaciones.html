@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notificaciones - Monitoreo Calles BAQ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header con botón volver -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>
+                <i class="bi bi-bell"></i> Notificaciones
+                {% if no_leidas > 0 %}
+                <span class="badge bg-danger">{{ no_leidas }}</span>
+                {% endif %}
+            </h2>
+        </div>
+        <div>
+            <a href="javascript:history.back()" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+            {% if no_leidas > 0 %}
+            <form method="POST" action="{% url 'usuarios:marcar_notificaciones_leidas' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-all"></i> Marcar Todas como Leídas
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Lista de Notificaciones -->
+    {% if notificaciones %}
+    <div class="list-group shadow-sm">
+        {% for notif in notificaciones %}
+        <div class="list-group-item list-group-item-action notification-item {% if not notif.leido %}unread{% endif %}">
+            <div class="d-flex w-100 justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center mb-2">
+                        <!-- Icono según canal -->
+                        {% if notif.canal == 'email' %}
+                            <i class="bi bi-envelope text-primary me-2" style="font-size: 1.5rem;"></i>
+                        {% elif notif.canal == 'sms' %}
+                            <i class="bi bi-phone text-success me-2" style="font-size: 1.5rem;"></i>
+                        {% elif notif.canal == 'push' %}
+                            <i class="bi bi-bell-fill text-warning me-2" style="font-size: 1.5rem;"></i>
+                        {% else %}
+                            <i class="bi bi-app-indicator text-info me-2" style="font-size: 1.5rem;"></i>
+                        {% endif %}
+                        
+                        <div class="flex-grow-1">
+                            <p class="mb-0">{{ notif.mensaje }}</p>
+                            
+                            {% if notif.reporte %}
+                            <small class="text-muted">
+                                <i class="bi bi-file-earmark-text"></i> 
+                                Reporte: 
+                                <a href="{% url 'reportes:detalle_reporte' notif.reporte.pk %}">
+                                    #{{ notif.reporte.id }} - {{ notif.reporte.titulo }}
+                                </a>
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-end ms-3">
+                    <small class="text-muted d-block">
+                        {{ notif.enviado_en|timesince }} atrás
+                    </small>
+                    <small class="text-muted">
+                        {{ notif.enviado_en|date:"d/m/Y H:i" }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginación (si implementas después) -->
+    <div class="text-center mt-4">
+        <small class="text-muted">Mostrando {{ notificaciones.count }} notificaciones</small>
+    </div>
+
+    {% else %}
+    <!-- Estado vacío -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-bell-slash" style="font-size: 5rem; opacity: 0.3;"></i>
+            <h4 class="mt-3">No tienes notificaciones</h4>
+            <p class="text-muted">
+                Cuando haya novedades en tus reportes, aparecerán aquí.
+            </p>
+            <a href="{% url 'usuarios:home' %}" class="btn btn-primary">
+                <i class="bi bi-house"></i> Ir al Inicio
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.notification-item.unread {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-left: 4px solid #0d6efd;
+}
+
+.notification-item:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+</style>
+{% endblock %}

@@ -6,7 +6,10 @@ from django.db.models import Count, Q
 from django.utils import timezone
 from .forms import RegistroForm, LoginForm
 from .models import Usuario
-from apps.reportes.models import Reporte, Notificacion
+from apps.reportes.models import (
+    Reporte, Notificacion, EstadoReporte, PrioridadReporte,
+    Asignacion, HistorialReporte, Evidencia
+)
 
 def registro_view(request):
     if request.method == 'POST':
@@ -133,9 +136,11 @@ def ciudadano_home(request):
 @login_required
 def tecnico_home(request):
     """Dashboard para técnicos"""
-    # Reportes asignados a este técnico
+    # Reportes asignados a este técnico con conteo de evidencias
     mis_asignaciones = Reporte.objects.filter(
         asignaciones__tecnico=request.user
+    ).select_related('estado', 'prioridad').annotate(
+        num_evidencias=Count('evidencias')
     ).distinct().order_by('-reportado_en')[:10]
     
     estadisticas = {
@@ -167,36 +172,31 @@ def autoridad_home(request):
     # Estadísticas generales
     estadisticas = {
         'total': Reporte.objects.count(),
-        'nuevos': Reporte.objects.filter(estado__nombre='Nuevo').count(),
-        'en_proceso': Reporte.objects.filter(
-            estado__nombre__in=['En Revisión', 'Asignado', 'En Proceso']
-        ).count(),
+        'sin_asignar': Reporte.objects.filter(asignaciones__isnull=True).count(),
+        'en_proceso': Reporte.objects.filter(estado__nombre='En Proceso').count(),
         'resueltos': Reporte.objects.filter(estado__nombre='Resuelto').count(),
-        'criticos': Reporte.objects.filter(prioridad__nombre='Crítica').count(),
     }
     
-    # Reportes recientes críticos
-    reportes_criticos = Reporte.objects.filter(
-        prioridad__nombre='Crítica'
-    ).exclude(
-        estado__nombre='Resuelto'
-    ).order_by('-reportado_en')[:5]
+    # Reportes recientes sin asignar
+    reportes_recientes = Reporte.objects.filter(
+        asignaciones__isnull=True
+    ).select_related('usuario', 'estado', 'prioridad').order_by('-reportado_en')[:10]
     
-    # Reportes por prioridad
-    por_prioridad = Reporte.objects.values('prioridad__nombre').annotate(
-        count=Count('id')
-    ).order_by('prioridad__nivel_gravedad')
+    # Reportes por tipo (tipo es CharField, no ForeignKey)
+    reportes_por_tipo = Reporte.objects.values('tipo').annotate(
+        total=Count('id')
+    ).order_by('-total')
     
-    # Reportes por estado
-    por_estado = Reporte.objects.values('estado__nombre').annotate(
-        count=Count('id')
-    )
+    # Reportes por prioridad (nivel_gravedad es IntegerField)
+    reportes_por_prioridad = Reporte.objects.values('prioridad__nivel_gravedad').annotate(
+        total=Count('id')
+    ).order_by('-total')
     
     context = {
         'estadisticas': estadisticas,
-        'reportes_criticos': reportes_criticos,
-        'por_prioridad': por_prioridad,
-        'por_estado': por_estado,
+        'reportes_recientes': reportes_recientes,
+        'reportes_por_tipo': reportes_por_tipo,
+        'reportes_por_prioridad': reportes_por_prioridad,
     }
     return render(request, 'usuarios/autoridad_home.html', context)
 
@@ -204,23 +204,313 @@ def autoridad_home(request):
 @login_required
 def perfil_view(request):
     """Vista del perfil del usuario"""
-    return render(request, 'usuarios/perfil.html')
+    context = {}
+    
+    # Si es ciudadano, agregar estadísticas
+    if request.user.rol and request.user.rol.nombre == 'Ciudadano':
+        from apps.reportes.models import Reporte
+        reportes = Reporte.objects.filter(usuario=request.user)
+        
+        context['estadisticas'] = {
+            'total': reportes.count(),
+            'nuevos': reportes.filter(estado__nombre='Nuevo').count(),
+            'en_proceso': reportes.filter(estado__nombre__in=['En Revisión', 'Asignado', 'En Proceso']).count(),
+            'resueltos': reportes.filter(estado__nombre='Resuelto').count(),
+        }
+    
+    return render(request, 'usuarios/perfil.html', context)
+
+
+@login_required
+def actualizar_perfil(request):
+    """Vista para actualizar datos del perfil"""
+    if request.method == 'POST':
+        user = request.user
+        user.first_name = request.POST.get('first_name', '')
+        user.last_name = request.POST.get('last_name', '')
+        user.email = request.POST.get('email', user.email)
+        user.telefono = request.POST.get('telefono', '')
+        user.save()
+        
+        messages.success(request, '¡Perfil actualizado exitosamente!')
+        return redirect('usuarios:perfil')
+    
+    return redirect('usuarios:perfil')
+
+
+@login_required
+def cambiar_password(request):
+    """Vista para cambiar la contraseña"""
+    if request.method == 'POST':
+        from django.contrib.auth import update_session_auth_hash
+        
+        old_password = request.POST.get('old_password')
+        new_password1 = request.POST.get('new_password1')
+        new_password2 = request.POST.get('new_password2')
+        
+        # Verificar contraseña actual
+        if not request.user.check_password(old_password):
+            messages.error(request, 'La contraseña actual es incorrecta.')
+            return redirect('usuarios:perfil')
+        
+        # Verificar que las nuevas contraseñas coincidan
+        if new_password1 != new_password2:
+            messages.error(request, 'Las nuevas contraseñas no coinciden.')
+            return redirect('usuarios:perfil')
+        
+        # Validar longitud mínima
+        if len(new_password1) < 8:
+            messages.error(request, 'La contraseña debe tener al menos 8 caracteres.')
+            return redirect('usuarios:perfil')
+        
+        # Cambiar contraseña
+        request.user.set_password(new_password1)
+        request.user.save()
+        
+        # Mantener la sesión activa
+        update_session_auth_hash(request, request.user)
+        
+        messages.success(request, '¡Contraseña cambiada exitosamente!')
+        return redirect('usuarios:perfil')
+    
+    return redirect('usuarios:perfil')
 
 
 @login_required
 def notificaciones_view(request):
     """Vista de notificaciones del usuario"""
+    # Contar no leídas primero
+    no_leidas = Notificacion.objects.filter(
+        usuario=request.user,
+        leido=False
+    ).count()
+    
+    # Obtener últimas 50 notificaciones
     notificaciones = Notificacion.objects.filter(
         usuario=request.user
-    ).order_by('-enviado_en')[:20]
+    ).order_by('-enviado_en')[:50]
     
-    # Marcar como leídas al visualizar
+    context = {
+        'notificaciones': notificaciones,
+        'no_leidas': no_leidas
+    }
+    return render(request, 'usuarios/notificaciones.html', context)
+
+
+@login_required
+def marcar_notificaciones_leidas(request):
+    """Marca todas las notificaciones como leídas"""
     Notificacion.objects.filter(
         usuario=request.user,
         leido=False
     ).update(leido=True)
     
-    context = {
-        'notificaciones': notificaciones
-    }
-    return render(request, 'usuarios/notificaciones.html', context)
+    messages.success(request, 'Notificaciones marcadas como leídas.')
+    return redirect('usuarios:notificaciones')
+
+
+# ============================================
+# VISTAS PARA TÉCNICOS
+# ============================================
+
+@login_required
+def cambiar_estado_reporte(request, pk):
+    """Permite al técnico cambiar el estado de un reporte asignado"""
+    reporte = get_object_or_404(Reporte, pk=pk)
+    
+    # Verificar que el técnico tenga este reporte asignado
+    if not Asignacion.objects.filter(reporte=reporte, tecnico=request.user).exists():
+        messages.error(request, 'Este reporte no está asignado a ti.')
+        return redirect('usuarios:tecnico_home')
+    
+    if request.method == 'POST':
+        nuevo_estado_id = request.POST.get('estado')
+        notas = request.POST.get('notas', '')
+        
+        nuevo_estado = get_object_or_404(EstadoReporte, id=nuevo_estado_id)
+        
+        # Cambiar estado
+        estado_anterior = reporte.estado
+        reporte.estado = nuevo_estado
+        reporte.save()
+        
+        # Registrar en historial
+        HistorialReporte.objects.create(
+            reporte=reporte,
+            usuario=request.user,
+            accion='Cambio de estado',
+            detalles=f'{estado_anterior.nombre} → {nuevo_estado.nombre}. Notas: {notas}'
+        )
+        
+        # Crear notificación para el ciudadano
+        Notificacion.objects.create(
+            usuario=reporte.usuario,
+            reporte=reporte,
+            canal='app',
+            mensaje=f'Tu reporte "{reporte.titulo}" cambió a estado: {nuevo_estado.nombre}'
+        )
+        
+        messages.success(request, f'Estado actualizado a: {nuevo_estado.nombre}')
+        return redirect('usuarios:tecnico_home')
+    
+    estados = EstadoReporte.objects.all()
+    
+    return render(request, 'reportes/cambiar_estado.html', {
+        'reporte': reporte,
+        'estados': estados
+    })
+
+
+@login_required
+def subir_evidencia_reparacion(request, pk):
+    """Permite al técnico subir evidencia de la reparación"""
+    reporte = get_object_or_404(Reporte, pk=pk)
+    
+    # Verificar asignación
+    if not Asignacion.objects.filter(reporte=reporte, tecnico=request.user).exists():
+        messages.error(request, 'No tienes permiso para subir evidencias a este reporte.')
+        return redirect('usuarios:tecnico_home')
+    
+    if request.method == 'POST':
+        archivo = request.FILES.get('archivo')
+        notas = request.POST.get('notas', '')
+        
+        if archivo:
+            # Determinar tipo
+            if archivo.content_type.startswith('image'):
+                tipo = 'foto'
+            elif archivo.content_type.startswith('video'):
+                tipo = 'video'
+            else:
+                tipo = 'documento'
+            
+            # Crear evidencia
+            Evidencia.objects.create(
+                reporte=reporte,
+                tipo_evidencia=tipo,
+                archivo=archivo,
+                nombre_archivo=archivo.name,
+                tamano_bytes=archivo.size
+            )
+            
+            # Registrar en historial
+            HistorialReporte.objects.create(
+                reporte=reporte,
+                usuario=request.user,
+                accion='Evidencia de reparación subida',
+                detalles=f'Archivo: {archivo.name}. {notas}'
+            )
+            
+            messages.success(request, 'Evidencia subida correctamente.')
+            return redirect('usuarios:tecnico_home')
+        else:
+            messages.error(request, 'Debes seleccionar un archivo.')
+    
+    return render(request, 'reportes/subir_evidencia_reparacion.html', {
+        'reporte': reporte
+    })
+
+
+# ============================================
+# VISTAS PARA AUTORIDADES
+# ============================================
+
+@login_required
+def asignar_tecnico(request, pk):
+    """Permite a la autoridad asignar un técnico a un reporte"""
+    
+    # Verificar que sea autoridad o admin
+    if request.user.rol.nombre not in ['Autoridad', 'Administrador']:
+        messages.error(request, 'No tienes permisos para asignar técnicos.')
+        return redirect('usuarios:home')
+    
+    reporte = get_object_or_404(Reporte, pk=pk)
+    
+    if request.method == 'POST':
+        tecnico_id = request.POST.get('tecnico')
+        notas = request.POST.get('notas', '')
+        
+        tecnico = get_object_or_404(Usuario, id=tecnico_id)
+        
+        # Crear asignación
+        asignacion = Asignacion.objects.create(
+            reporte=reporte,
+            tecnico=tecnico,
+            asignado_por=request.user,
+            notas=notas
+        )
+        
+        # Cambiar estado a "Asignado"
+        estado_asignado = EstadoReporte.objects.get(nombre='Asignado')
+        reporte.estado = estado_asignado
+        reporte.save()
+        
+        # Registrar en historial
+        HistorialReporte.objects.create(
+            reporte=reporte,
+            usuario=request.user,
+            accion='Reporte asignado',
+            detalles=f'Asignado a técnico: {tecnico.get_full_name() or tecnico.username}'
+        )
+        
+        # Notificar al técnico
+        Notificacion.objects.create(
+            usuario=tecnico,
+            reporte=reporte,
+            canal='app',
+            mensaje=f'Se te ha asignado el reporte: {reporte.titulo} en {reporte.direccion}'
+        )
+        
+        messages.success(request, f'Reporte asignado a {tecnico.username}')
+        return redirect('usuarios:autoridad_home')
+    
+    # Obtener solo técnicos
+    tecnicos = Usuario.objects.filter(rol__nombre='Técnico', activo=True)
+    
+    return render(request, 'reportes/asignar_tecnico.html', {
+        'reporte': reporte,
+        'tecnicos': tecnicos
+    })
+
+
+@login_required
+def lista_reportes_autoridad(request):
+    """Vista de todos los reportes para autoridades con filtros"""
+    
+    if request.user.rol.nombre not in ['Autoridad', 'Administrador']:
+        messages.error(request, 'No tienes permisos para ver esta página.')
+        return redirect('usuarios:home')
+    
+    # Obtener todos los reportes
+    reportes = Reporte.objects.all().select_related(
+        'usuario', 'estado', 'prioridad'
+    ).prefetch_related('asignaciones__tecnico').order_by('-reportado_en')
+    
+    # Filtros
+    estado_filtro = request.GET.get('estado')
+    prioridad_filtro = request.GET.get('prioridad')
+    
+    if estado_filtro:
+        reportes = reportes.filter(estado__id=estado_filtro)
+    
+    if prioridad_filtro:
+        reportes = reportes.filter(prioridad__id=prioridad_filtro)
+    
+    # Estadísticas
+    total_reportes = Reporte.objects.count()
+    sin_asignar = Reporte.objects.filter(asignaciones__isnull=True).count()
+    en_proceso = Reporte.objects.filter(estado__nombre='En Proceso').count()
+    resueltos = Reporte.objects.filter(estado__nombre='Resuelto').count()
+    
+    estados = EstadoReporte.objects.all()
+    prioridades = PrioridadReporte.objects.all()
+    
+    return render(request, 'reportes/lista_reportes_autoridad.html', {
+        'reportes': reportes,
+        'estados': estados,
+        'prioridades': prioridades,
+        'total_reportes': total_reportes,
+        'sin_asignar': sin_asignar,
+        'en_proceso': en_proceso,
+        'resueltos': resueltos,
+    })

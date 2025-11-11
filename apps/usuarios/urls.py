@@ -9,11 +9,14 @@ urlpatterns = [
     path('registro/', views.registro_view, name='registro'),
     path('logout/', views.logout_view, name='logout'),
     
-    # Perfil y notificaciones
+    # Perfil y configuración
     path('perfil/', views.perfil_view, name='perfil'),
+    path('perfil/actualizar/', views.actualizar_perfil, name='actualizar_perfil'),
+    path('perfil/cambiar-password/', views.cambiar_password, name='cambiar_password'),
     path('notificaciones/', views.notificaciones_view, name='notificaciones'),
+    path('notificaciones/marcar-leidas/', views.marcar_notificaciones_leidas, name='marcar_notificaciones_leidas'),
 
-    # Rutas por rol
+    # Rutas por rol (Dashboards)
     path('ciudadano/', views.ciudadano_home, name='ciudadano_home'),
     path('tecnico/', views.tecnico_home, name='tecnico_home'),
     path('autoridad/', views.autoridad_home, name='autoridad_home'),

@@ -1,14 +1,26 @@
 from django.urls import path
 from . import views
+from apps.usuarios import views as usuarios_views
 
 app_name = 'reportes'
 
 urlpatterns = [
+    # Públicas
     path('', views.lista_reportes, name='lista_reportes'),
+    path('mapa/', views.mapa_reportes, name='mapa'),
+    
+    # Ciudadanos
     path('crear/', views.crear_reporte, name='crear_reporte'),
     path('exitoso/<int:pk>/', views.reporte_exitoso, name='reporte_exitoso'),
     path('mis-reportes/', views.mis_reportes, name='mis_reportes'),
     path('detalle/<int:pk>/', views.detalle_reporte, name='detalle_reporte'),
     path('agregar-evidencia/<int:pk>/', views.agregar_evidencia, name='agregar_evidencia'),
-    path('mapa/', views.mapa_reportes, name='mapa'),
+    
+    # Técnicos
+    path('cambiar-estado/<int:pk>/', usuarios_views.cambiar_estado_reporte, name='cambiar_estado_reporte'),
+    path('subir-evidencia-reparacion/<int:pk>/', usuarios_views.subir_evidencia_reparacion, name='subir_evidencia_reparacion'),
+    
+    # Autoridades
+    path('asignar-tecnico/<int:pk>/', usuarios_views.asignar_tecnico, name='asignar_tecnico'),
+    path('lista-autoridad/', usuarios_views.lista_reportes_autoridad, name='lista_reportes_autoridad'),
 ]

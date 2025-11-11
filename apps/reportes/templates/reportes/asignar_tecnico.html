@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Asignar Técnico - Reporte #{{ reporte.id }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Botón volver -->
+    <div class="mb-3">
+        <a href="{% url 'usuarios:autoridad_home' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Info del Reporte -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-earmark-text"></i> Reporte #{{ reporte.id }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h4>{{ reporte.titulo }}</h4>
+                    <p class="text-muted">{{ reporte.descripcion|truncatewords:30 }}</p>
+                    
+                    <hr>
+                    
+                    <div class="mb-2">
+                        <strong>Tipo:</strong> {{ reporte.get_tipo_display }}
+                    </div>
+                    
+                    <div class="mb-2">
+                        <strong>Prioridad:</strong> 
+                        <span class="badge badge-prioridad-{{ reporte.prioridad.nombre|lower }}">
+                            {{ reporte.prioridad.nombre }}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <strong>Estado:</strong> 
+                        <span class="badge badge-estado-{{ reporte.estado.nombre|lower|cut:' ' }}">
+                            {{ reporte.estado.nombre }}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <strong>Ubicación:</strong><br>
+                        <i class="bi bi-geo-alt"></i> {{ reporte.direccion }}
+                    </div>
+                    
+                    <div class="mb-2">
+                        <strong>Reportado por:</strong><br>
+                        {{ reporte.usuario.get_full_name|default:reporte.usuario.username }}
+                        <br><small class="text-muted">{{ reporte.usuario.email }}</small>
+                    </div>
+                    
+                    <div class="mb-0">
+                        <strong>Fecha:</strong> {{ reporte.reportado_en|date:"d/m/Y H:i" }}
+                    </div>
+
+                    {% if reporte.asignaciones.exists %}
+                    <hr>
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Ya asignado a:</strong><br>
+                        {% for asignacion in reporte.asignaciones.all %}
+                        • {{ asignacion.tecnico.get_full_name|default:asignacion.tecnico.username }}
+                        ({{ asignacion.fecha_asignacion|date:"d/m/Y" }})<br>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de Asignación -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-plus"></i> Asignar Técnico
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if tecnicos %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="tecnico" class="form-label">Seleccionar Técnico *</label>
+                            <select class="form-select" id="tecnico" name="tecnico" required>
+                                <option value="">Seleccionar...</option>
+                                {% for tecnico in tecnicos %}
+                                <option value="{{ tecnico.id }}">
+                                    {{ tecnico.get_full_name|default:tecnico.username }}
+                                    {% if tecnico.email %} - {{ tecnico.email }}{% endif %}
+                                    ({{ tecnico.asignaciones_tecnico.count }} asignaciones)
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">
+                                El técnico recibirá una notificación automáticamente.
+                            </small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="notas" class="form-label">Notas / Instrucciones</label>
+                            <textarea class="form-control" id="notas" name="notas" rows="4" 
+                                      placeholder="Instrucciones especiales, materiales necesarios, etc."></textarea>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            Al asignar, el estado cambiará a <strong>"Asignado"</strong> automáticamente.
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-check-circle"></i> Asignar Técnico
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        No hay técnicos disponibles en el sistema.
+                        <hr>
+                        <a href="/admin/usuarios/usuario/add/" class="btn btn-sm btn-primary" target="_blank">
+                            Crear Técnico en Admin
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Estadísticas de Técnicos -->
+            {% if tecnicos %}
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-bar-chart"></i> Carga de Trabajo
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for tecnico in tecnicos %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ tecnico.get_full_name|default:tecnico.username }}</strong><br>
+                                <small class="text-muted">{{ tecnico.email }}</small>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">
+                                {{ tecnico.asignaciones_tecnico.count }} asignaciones
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
