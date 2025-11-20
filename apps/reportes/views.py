@@ -41,13 +41,15 @@ def crear_reporte(request):
                 else:
                     tipo = 'documento'
                 
-                # SE Crear registro de evidencia
+                # SE Crear registro de evidencia CON USUARIO
                 evidencia = Evidencia(
                     reporte=reporte,
                     tipo_evidencia=tipo,
                     archivo=archivo_evidencia,
                     nombre_archivo=archivo_evidencia.name,
-                    tamano_bytes=archivo_evidencia.size
+                    tamano_bytes=archivo_evidencia.size,
+                    subida_por=request.user,  # AGREGAR
+                    es_evidencia_reparacion=False  # AGREGAR
                 )
                 evidencia.save()
             
@@ -59,6 +61,24 @@ def crear_reporte(request):
     return render(request, 'reportes/crear_reporte.html', {
         'form': form
     })
+
+# BORRAR EVIDENCIA DE REPARACIÓN
+
+@login_required
+def borrar_evidencia_reparacion(request, pk):
+    """Permite al técnico borrar sus propias evidencias de reparación"""
+    evidencia = get_object_or_404(Evidencia, pk=pk)
+    
+    # Verificar que sea del técnico actual
+    if evidencia.subida_por != request.user:
+        messages.error(request, 'No puedes eliminar esta evidencia.')
+        return redirect('usuarios:tecnico_home')
+    
+    reporte_id = evidencia.reporte.pk
+    evidencia.delete()
+    
+    messages.success(request, 'Evidencia eliminada correctamente.')
+    return redirect('reportes:cambiar_estado_reporte', pk=reporte_id)
 
 
 def reporte_exitoso(request, pk):
@@ -98,7 +118,7 @@ def agregar_evidencia(request, pk):
     """Vista para agregar evidencias a un reporte existente"""
     reporte = get_object_or_404(Reporte, pk=pk)
     
-    # SE Verificar que el usuario sea el dueño
+    # Verificar que el usuario sea el dueño
     if reporte.usuario != request.user:
         messages.error(request, 'No tienes permiso para agregar evidencias a este reporte.')
         return redirect('reportes:mis_reportes')
@@ -125,7 +145,7 @@ def lista_reportes(request):
     """Vista pública de todos los reportes con filtros"""
     reportes = Reporte.objects.all().order_by('-reportado_en')
     
-    # SE Filtros
+    # Filtros
     busqueda = request.GET.get('q', '')
     estado = request.GET.get('estado', '')
     prioridad = request.GET.get('prioridad', '')
@@ -143,12 +163,12 @@ def lista_reportes(request):
     if prioridad:
         reportes = reportes.filter(prioridad__nombre=prioridad)
     
-    # SE Paginación
+    # Paginación
     paginator = Paginator(reportes, 12)
     page = request.GET.get('page')
     reportes_page = paginator.get_page(page)
     
-    # SE Obtener listas para filtros
+    # Obtener listas para filtros
     estados = EstadoReporte.objects.all()
     prioridades = PrioridadReporte.objects.all()
     

@@ -61,8 +61,10 @@ main {
    ============================================ */
 .badge-estado-nuevo {
     background-color: #0dcaf0;
+    color: white;
 }
 
+.badge-estado-enrevision,
 .badge-estado-revision {
     background-color: #ffc107;
     color: #000;
@@ -70,38 +72,59 @@ main {
 
 .badge-estado-asignado {
     background-color: #0d6efd;
+    color: white;
 }
 
+.badge-estado-enproceso,
 .badge-estado-proceso {
     background-color: #fd7e14;
+    color: #000;
 }
 
 .badge-estado-resuelto {
     background-color: #198754;
+    color: white;
 }
 
 .badge-estado-rechazado {
     background-color: #dc3545;
+    color: white;
 }
 
 /* ============================================
    BADGES DE PRIORIDAD
    ============================================ */
 .badge-prioridad-baja {
-    background-color: #6c757d;
+    background-color: #6c757d !important;
+    color: white !important;
+    font-weight: 700 !important;
+    padding: 8px 14px !important;
+    font-size: 0.9rem !important;
 }
 
 .badge-prioridad-media {
-    background-color: #ffc107;
-    color: #000;
+    background-color: #ffc107 !important;
+    color: #000 !important;
+    font-weight: 700 !important;
+    padding: 8px 14px !important;
+    font-size: 0.9rem !important;
 }
 
 .badge-prioridad-alta {
-    background-color: #fd7e14;
+    background-color: #fd7e14 !important;
+    color: white !important;
+    font-weight: 700 !important;
+    padding: 8px 14px !important;
+    font-size: 0.9rem !important;
 }
 
-.badge-prioridad-critica {
-    background-color: #dc3545;
+.badge-prioridad-critica,
+.badge-prioridad-crítica {
+    background-color: #dc3545 !important;
+    color: white !important;
+    font-weight: 700 !important;
+    padding: 8px 14px !important;
+    font-size: 0.9rem !important;
     animation: pulse 2s infinite;
 }
 
