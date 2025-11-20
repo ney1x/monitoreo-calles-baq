@@ -3,16 +3,9 @@
 
 {% block title %}Mapa de Reportes - Monitoreo Calles BAQ{% endblock %}
 
-{% extends 'base.html' %}
-{% load static %}
-
-{% block title %}Mapa de Reportes - Monitoreo Calles BAQ{% endblock %}
-
 {% block extra_css %}
 <style>
-    /* Asegurar que el mapa tome todo el espacio */
-    html,
-    body {
+    html, body {
         height: 100%;
         margin: 0;
         padding: 0;
@@ -24,46 +17,24 @@
         z-index: 1;
     }
 
-    /* Estilos para marcadores personalizados */
     .custom-marker {
         background: none;
         border: none;
     }
 
-    /* Sidebar con scroll */
     .sidebar-mapa {
         height: calc(100vh - 56px);
         overflow-y: auto;
         background-color: #f8f9fa;
     }
 
-    /* Estilos para los popups */
     .leaflet-popup-content-wrapper {
         border-radius: 8px;
-    }
-
-    /* Badges en popups */
-    .badge-prioridad-crítica {
-        background-color: #dc3545;
-    }
-
-    .badge-prioridad-alta {
-        background-color: #ffc107;
-        color: #000;
-    }
-
-    .badge-prioridad-media {
-        background-color: #0dcaf0;
-    }
-
-    .badge-prioridad-baja {
-        background-color: #6c757d;
     }
 </style>
 
 <!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 <!-- Leaflet MarkerCluster CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
@@ -79,7 +50,6 @@
         <div class="p-3">
             <h5 class="mb-3"><i class="bi bi-funnel"></i> Filtros</h5>
 
-            <!-- Filtro por Estado -->
             <div class="mb-3">
                 <label class="form-label fw-bold">Estado</label>
                 <select class="form-select" id="filtroEstado" onchange="aplicarFiltrosMapa()">
@@ -93,7 +63,6 @@
                 </select>
             </div>
 
-            <!-- Filtro por Prioridad -->
             <div class="mb-3">
                 <label class="form-label fw-bold">Prioridad</label>
                 <select class="form-select" id="filtroPrioridad" onchange="aplicarFiltrosMapa()">
@@ -105,7 +74,6 @@
                 </select>
             </div>
 
-            <!-- Filtro por Tipo -->
             <div class="mb-3">
                 <label class="form-label fw-bold">Tipo de Falla</label>
                 <select class="form-select" id="filtroTipo" onchange="aplicarFiltrosMapa()">
@@ -126,7 +94,6 @@
 
             <hr>
 
-            <!-- Leyenda -->
             <h6 class="mb-3"><i class="bi bi-info-circle"></i> Leyenda</h6>
             <div class="d-flex align-items-center mb-2">
                 <i class="bi bi-geo-alt-fill text-danger me-2" style="font-size: 1.5rem;"></i>
@@ -150,8 +117,7 @@
             <div class="alert alert-success">
                 <i class="bi bi-cursor-fill"></i>
                 <strong>Clic en el mapa</strong>
-                <p class="mb-0 small mt-2">Haz clic en cualquier punto del mapa para crear un reporte en esa ubicación
-                </p>
+                <p class="mb-0 small mt-2">Haz clic en cualquier punto del mapa para crear un reporte</p>
             </div>
             {% endif %}
         </div>
@@ -174,8 +140,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="{% url 'reportes:crear_reporte_desde_mapa' %}" enctype="multipart/form-data"
-                id="formReporteMapa">
+            <form method="POST" action="{% url 'reportes:crear_reporte_desde_mapa' %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
                     <input type="hidden" name="latitud" id="modal_latitud">
@@ -215,8 +180,7 @@
 
                     <div class="mb-3">
                         <label for="evidencia" class="form-label fw-bold">Foto o Video (opcional)</label>
-                        <input type="file" class="form-control" name="evidencia" id="evidencia"
-                            accept="image/*,video/*">
+                        <input type="file" class="form-control" name="evidencia" id="evidencia" accept="image/*,video/*">
                         <div class="form-text">Sube una foto o video del problema</div>
                     </div>
                 </div>
@@ -234,36 +198,51 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet MarkerCluster Plugin -->
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
 <script>
-    // Datos de reportes existentes desde Django
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Iniciando mapa...');
+    
+    // Datos de reportes desde Django
     const reportesData = [
         {% for reporte in reportes %}
-    {
-        id: { { reporte.id } },
-        lat: { { reporte.latitud } },
-        lng: { { reporte.longitud } },
-        titulo: "{{ reporte.titulo|escapejs }}",
+        {% if reporte.latitud and reporte.longitud %}
+        {
+            id: {{ reporte.id }},
+            lat: parseFloat({{ reporte.latitud }}),
+            lng: parseFloat({{ reporte.longitud }}),
+            titulo: "{{ reporte.titulo|escapejs }}",
             descripcion: "{{ reporte.descripcion|truncatewords:20|escapejs }}",
-                estado: "{{ reporte.estado.nombre|default:'Sin estado' }}",
-                    prioridad: "{{ reporte.prioridad.nombre|default:'Sin prioridad' }}",
-                        tipo: "{{ reporte.tipo }}",
-                            direccion: "{{ reporte.direccion|escapejs }}",
-                                fecha: "{{ reporte.reportado_en|date:'d/m/Y H:i' }}",
-                                    url: "{% url 'reportes:detalle_reporte' reporte.pk %}"
-    } {% if not forloop.last %}, {% endif %}
-    {% endfor %}
+            estado: "{{ reporte.estado.nombre|default:'Sin estado'|escapejs }}",
+            prioridad: "{{ reporte.prioridad.nombre|default:'Sin prioridad'|escapejs }}",
+            tipo: "{{ reporte.tipo }}",
+            direccion: "{{ reporte.direccion|escapejs }}",
+            fecha: "{{ reporte.reportado_en|date:'d/m/Y H:i' }}",
+            url: "{% url 'reportes:detalle_reporte' reporte.pk %}"
+        },
+        {% endif %}
+        {% endfor %}
     ];
+    
+    // Remover última coma si existe
+    const reportes = reportesData.filter(r => r && r.lat && r.lng);
+    console.log('Reportes cargados:', reportes.length);
 
-    // Inicializar mapa centrado en Barranquilla
+    // Inicializar mapa
     const map = L.map('map').setView([10.9639, -74.7964], 13);
-
-    // Añadir capa de OpenStreetMap
+    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 19
     }).addTo(map);
+    
+    console.log('Mapa inicializado');
 
-    // Cluster group para agrupar marcadores cercanos
+    // Cluster group
     const markers = L.markerClusterGroup({
         chunkedLoading: true,
         spiderfyOnMaxZoom: true,
@@ -273,78 +252,92 @@
     let todosLosMarcadores = [];
     let marcadorTemporal = null;
 
-    // Función para obtener color según prioridad
+    // Función color por prioridad
     function getColorByPriority(prioridad) {
-        switch (prioridad) {
-            case 'Crítica': return '#dc3545';
-            case 'Alta': return '#ffc107';
-            case 'Media': return '#0dcaf0';
-            case 'Baja': return '#6c757d';
-            default: return '#0d6efd';
-        }
+        const colores = {
+            'Crítica': '#dc3545',
+            'Alta': '#ffc107',
+            'Media': '#0dcaf0',
+            'Baja': '#6c757d'
+        };
+        return colores[prioridad] || '#0d6efd';
     }
 
-    // Función para obtener icono personalizado
+    // Función icono personalizado
     function getCustomIcon(prioridad) {
         const color = getColorByPriority(prioridad);
         return L.divIcon({
-            html: `<i class="bi bi-geo-alt-fill" style="color: ${color}; font-size: 2rem;"></i>`,
+            html: '<i class="bi bi-geo-alt-fill" style="color: ' + color + '; font-size: 2rem;"></i>',
             className: 'custom-marker',
             iconSize: [30, 30],
             iconAnchor: [15, 30]
         });
     }
 
-    // Crear marcadores de reportes existentes
-    reportesData.forEach(reporte => {
-        const icon = getCustomIcon(reporte.prioridad);
-        const marker = L.marker([reporte.lat, reporte.lng], { icon: icon });
+    // Crear marcadores
+    reportes.forEach(function(reporte) {
+        if (reporte.lat && reporte.lng) {
+            const icon = getCustomIcon(reporte.prioridad);
+            const marker = L.marker([reporte.lat, reporte.lng], { icon: icon });
 
-        const popupContent = `
-            <div style="min-width: 250px;">
-                <h6 class="mb-2"><strong>${reporte.titulo}</strong></h6>
-                <p class="mb-1 small">${reporte.descripcion}</p>
-                <hr class="my-2">
-                <p class="mb-1 small">
-                    <strong>Prioridad:</strong> 
-                    <span class="badge badge-prioridad-${reporte.prioridad.toLowerCase()}">${reporte.prioridad}</span>
-                </p>
-                <p class="mb-1 small">
-                    <strong>Estado:</strong> 
-                    <span class="badge badge-estado-${reporte.estado.toLowerCase().replace(' ', '-')}">${reporte.estado}</span>
-                </p>
-                <p class="mb-1 small">
-                    <i class="bi bi-geo-alt"></i> ${reporte.direccion}
-                </p>
-                <p class="mb-2 small text-muted">
-                    <i class="bi bi-calendar"></i> ${reporte.fecha}
-                </p>
-                <a href="${reporte.url}" class="btn btn-primary btn-sm w-100">
-                    <i class="bi bi-eye"></i> Ver Detalles
-                </a>
-            </div>
-        `;
+            const popupContent = '<div style="min-width: 250px;">' +
+                '<h6 class="mb-2"><strong>' + reporte.titulo + '</strong></h6>' +
+                '<p class="mb-1 small">' + reporte.descripcion + '</p>' +
+                '<hr class="my-2">' +
+                '<p class="mb-1 small"><strong>Prioridad:</strong> <span class="badge bg-secondary">' + reporte.prioridad + '</span></p>' +
+                '<p class="mb-1 small"><strong>Estado:</strong> <span class="badge bg-info">' + reporte.estado + '</span></p>' +
+                '<p class="mb-1 small"><i class="bi bi-geo-alt"></i> ' + reporte.direccion + '</p>' +
+                '<p class="mb-2 small text-muted"><i class="bi bi-calendar"></i> ' + reporte.fecha + '</p>' +
+                '<a href="' + reporte.url + '" class="btn btn-primary btn-sm w-100"><i class="bi bi-eye"></i> Ver Detalles</a>' +
+                '</div>';
 
-        marker.bindPopup(popupContent);
-        marker.reporteData = reporte;
-        todosLosMarcadores.push(marker);
-        markers.addLayer(marker);
+            marker.bindPopup(popupContent);
+            marker.reporteData = reporte;
+            todosLosMarcadores.push(marker);
+            markers.addLayer(marker);
+        }
     });
 
     map.addLayer(markers);
+    console.log('Marcadores agregados:', todosLosMarcadores.length);
 
-    // Evento de clic en el mapa (solo para ciudadanos autenticados)
+    // Funciones de filtro
+    window.aplicarFiltrosMapa = function() {
+        const estadoFiltro = document.getElementById('filtroEstado').value;
+        const prioridadFiltro = document.getElementById('filtroPrioridad').value;
+        const tipoFiltro = document.getElementById('filtroTipo').value;
+
+        markers.clearLayers();
+
+        todosLosMarcadores.forEach(function(marker) {
+            const data = marker.reporteData;
+            const cumpleEstado = !estadoFiltro || data.estado === estadoFiltro;
+            const cumplePrioridad = !prioridadFiltro || data.prioridad === prioridadFiltro;
+            const cumpleTipo = !tipoFiltro || data.tipo === tipoFiltro;
+
+            if (cumpleEstado && cumplePrioridad && cumpleTipo) {
+                markers.addLayer(marker);
+            }
+        });
+    };
+
+    window.limpiarFiltrosMapa = function() {
+        document.getElementById('filtroEstado').value = '';
+        document.getElementById('filtroPrioridad').value = '';
+        document.getElementById('filtroTipo').value = '';
+        window.aplicarFiltrosMapa();
+    };
+
     {% if user.is_authenticated and user.rol.nombre == 'Ciudadano' %}
-    map.on('click', function (e) {
+    // Clic en mapa para crear reporte
+    map.on('click', function(e) {
         const lat = e.latlng.lat;
         const lng = e.latlng.lng;
 
-        // Eliminar marcador temporal anterior
         if (marcadorTemporal) {
             map.removeLayer(marcadorTemporal);
         }
 
-        // Crear marcador temporal
         marcadorTemporal = L.marker([lat, lng], {
             icon: L.divIcon({
                 html: '<i class="bi bi-plus-circle-fill" style="color: #198754; font-size: 2.5rem;"></i>',
@@ -354,76 +347,43 @@
             })
         }).addTo(map);
 
-        // Guardar coordenadas
         document.getElementById('modal_latitud').value = lat;
         document.getElementById('modal_longitud').value = lng;
 
-        // Obtener dirección usando Nominatim (OpenStreetMap)
-        obtenerDireccionInversa(lat, lng);
-
-        // Mostrar modal
-        const modal = new bootstrap.Modal(document.getElementById('modalCrearReporte'));
-        modal.show();
-    });
-    {% endif %}
-
-    // Función para obtener dirección desde coordenadas
-    function obtenerDireccionInversa(lat, lng) {
-        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
-
+        // Obtener dirección
+        const url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng;
         document.getElementById('direccion_seleccionada').innerHTML = 'Cargando dirección...';
 
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                if (data.display_name) {
-                    document.getElementById('direccion_seleccionada').innerHTML =
-                        `<small>${data.display_name}</small>`;
-                } else {
-                    document.getElementById('direccion_seleccionada').innerHTML =
-                        `<small>Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}</small>`;
-                }
+                const direccion = data.display_name || 'Lat: ' + lat.toFixed(6) + ', Lng: ' + lng.toFixed(6);
+                document.getElementById('direccion_seleccionada').innerHTML = '<small>' + direccion + '</small>';
             })
             .catch(error => {
-                console.error('Error al obtener dirección:', error);
-                document.getElementById('direccion_seleccionada').innerHTML =
-                    `<small>Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}</small>`;
+                document.getElementById('direccion_seleccionada').innerHTML = '<small>Lat: ' + lat.toFixed(6) + ', Lng: ' + lng.toFixed(6) + '</small>';
             });
-    }
 
-    // Aplicar filtros
-    function aplicarFiltrosMapa() {
-        const estadoFiltro = document.getElementById('filtroEstado').value;
-        const prioridadFiltro = document.getElementById('filtroPrioridad').value;
-        const tipoFiltro = document.getElementById('filtroTipo').value;
+        const modal = new bootstrap.Modal(document.getElementById('modalCrearReporte'));
+        modal.show();
+    });
 
-        markers.clearLayers();
-
-        todosLosMarcadores.forEach(marker => {
-            const data = marker.reporteData;
-
-            const cumpleEstado = !estadoFiltro || data.estado === estadoFiltro;
-            const cumplePrioridad = !prioridadFiltro || data.prioridad === prioridadFiltro;
-            const cumpleTipo = !tipoFiltro || data.tipo === tipoFiltro;
-
-            if (cumpleEstado && cumplePrioridad && cumpleTipo) {
-                markers.addLayer(marker);
+    // Limpiar marcador al cerrar modal
+    const modalElement = document.getElementById('modalCrearReporte');
+    if (modalElement) {
+        modalElement.addEventListener('hidden.bs.modal', function() {
+            if (marcadorTemporal) {
+                map.removeLayer(marcadorTemporal);
+                marcadorTemporal = null;
             }
         });
     }
+    {% endif %}
 
-    // Limpiar filtros
-    function limpiarFiltrosMapa() {
-        document.getElementById('filtroEstado').value = '';
-        document.getElementById('filtroPrioridad').value = '';
-        document.getElementById('filtroTipo').value = '';
-        aplicarFiltrosMapa();
-    }
-
-    // Añadir control de ubicación
+    // Ubicar al usuario
     map.locate({ setView: false, maxZoom: 16 });
-
-    map.on('locationfound', function (e) {
+    
+    map.on('locationfound', function(e) {
         L.circle(e.latlng, {
             radius: e.accuracy,
             color: '#0d6efd',
@@ -439,20 +399,8 @@
             })
         }).addTo(map).bindPopup("Tu ubicación");
     });
-
-    // Limpiar marcador temporal al cerrar modal
-    {% if user.is_authenticated and user.rol.nombre == 'Ciudadano' %}
-    document.getElementById('modalCrearReporte').addEventListener('hidden.bs.modal', function () {
-        if (marcadorTemporal) {
-            map.removeLayer(marcadorTemporal);
-            marcadorTemporal = null;
-        }
-    });
-    {% endif %}
+    
+    console.log('Mapa completamente cargado');
+});
 </script>
-
-<!-- Leaflet MarkerCluster Plugin -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 {% endblock %}
