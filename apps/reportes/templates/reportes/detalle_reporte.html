@@ -175,76 +175,65 @@
 
         <!-- COLUMNA DERECHA: Acciones y Estadísticas -->
         <div class="col-lg-4">
-            <!-- Acciones Rápidas -->
-            <div class="card border-0 shadow-sm mb-3">
-                <div class="card-header bg-success text-white">
-                    <h6 class="mb-0">
-                        <i class="bi bi-lightning-fill"></i> Acciones
-                    </h6>
+    <!-- Información del Estado -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h6 class="mb-0">
+                <i class="bi bi-info-circle"></i> Estado del Reporte
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="text-center mb-3">
+                <span class="badge badge-estado-{{ reporte.estado.nombre|lower|cut:' ' }} fs-5 px-4 py-2">
+                    {{ reporte.estado.nombre }}
+                </span>
+            </div>
+            
+            <p class="small text-muted text-center">
+                {% if reporte.estado.nombre == 'Nuevo' %}
+                    Tu reporte ha sido recibido y está pendiente de revisión.
+                {% elif reporte.estado.nombre == 'En Revisión' %}
+                    Las autoridades están revisando tu reporte.
+                {% elif reporte.estado.nombre == 'Asignado' %}
+                    Un técnico ha sido asignado para atender tu reporte.
+                {% elif reporte.estado.nombre == 'En Proceso' %}
+                    El técnico está trabajando en la reparación.
+                {% elif reporte.estado.nombre == 'Resuelto' %}
+                    ¡Tu reporte ha sido resuelto! Gracias por tu colaboración.
+                {% elif reporte.estado.nombre == 'Rechazado' %}
+                    Tu reporte ha sido rechazado. Revisa las notas del historial.
+                {% endif %}
+            </p>
+
+            <hr>
+
+            <div class="small">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Prioridad:</span>
+                    <span class="badge badge-prioridad-{{ reporte.prioridad.nombre|lower }}">
+                        {{ reporte.prioridad.nombre }}
+                    </span>
                 </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        {% if reporte.latitud and reporte.longitud %}
-                        <a href="https://www.google.com/maps?q={{ reporte.latitud }},{{ reporte.longitud }}" 
-                           target="_blank" 
-                           class="btn btn-outline-primary">
-                            <i class="bi bi-map"></i> Ver en Google Maps
-                        </a>
-                        {% endif %}
-                    </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Tipo:</span>
+                    <span>{{ reporte.get_tipo_display }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Evidencias:</span>
+                    <span>{{ reporte.evidencias.count }}</span>
                 </div>
             </div>
 
-            <!-- Información del Estado -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <h6 class="mb-0">
-                        <i class="bi bi-info-circle"></i> Estado del Reporte
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="text-center mb-3">
-                        <span class="badge badge-estado-{{ reporte.estado.nombre|lower|cut:' ' }} fs-5 px-4 py-2">
-                            {{ reporte.estado.nombre }}
-                        </span>
-                    </div>
-                    
-                    <p class="small text-muted text-center">
-                        {% if reporte.estado.nombre == 'Nuevo' %}
-                            Tu reporte ha sido recibido y está pendiente de revisión.
-                        {% elif reporte.estado.nombre == 'En Revisión' %}
-                            Las autoridades están revisando tu reporte.
-                        {% elif reporte.estado.nombre == 'Asignado' %}
-                            Un técnico ha sido asignado para atender tu reporte.
-                        {% elif reporte.estado.nombre == 'En Proceso' %}
-                            El técnico está trabajando en la reparación.
-                        {% elif reporte.estado.nombre == 'Resuelto' %}
-                            ¡Tu reporte ha sido resuelto! Gracias por tu colaboración.
-                        {% elif reporte.estado.nombre == 'Rechazado' %}
-                            Tu reporte ha sido rechazado. Revisa las notas del historial.
-                        {% endif %}
-                    </p>
-
-                    <hr>
-
-                    <div class="small">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Prioridad:</span>
-                            <span class="badge badge-prioridad-{{ reporte.prioridad.nombre|lower }}">
-                                {{ reporte.prioridad.nombre }}
-                            </span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Tipo:</span>
-                            <span>{{ reporte.get_tipo_display }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="text-muted">Evidencias:</span>
-                            <span>{{ reporte.evidencias.count }}</span>
-                        </div>
-                    </div>
-                </div>
+            {% if reporte.latitud and reporte.longitud %}
+            <hr>
+            <div class="d-grid">
+                <a href="https://www.google.com/maps?q={{ reporte.latitud }},{{ reporte.longitud }}" 
+                   target="_blank" 
+                   class="btn btn-outline-primary">
+                    <i class="bi bi-map"></i> Ver en Google Maps
+                </a>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>
