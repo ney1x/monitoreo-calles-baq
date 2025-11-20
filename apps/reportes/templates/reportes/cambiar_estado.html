@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Cambiar Estado - Reporte #{{ reporte.id }}{% endblock %}
+{% block title %}Gestionar Reporte #{{ reporte.id }}{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid">
     <!-- Botón volver -->
     <div class="mb-3">
         <a href="{% url 'usuarios:tecnico_home' %}" class="btn btn-outline-secondary">
@@ -13,171 +13,281 @@
     </div>
 
     <div class="row">
-        <!-- Información del Reporte -->
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm mb-4">
+        <!-- COLUMNA IZQUIERDA: Info + Evidencias -->
+        <div class="col-lg-5">
+            <!-- Card de Información -->
+            <div class="card border-0 shadow-sm mb-3">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0">
-                        <i class="bi bi-info-circle"></i> Información del Reporte
+                        <i class="bi bi-info-circle"></i> Reporte #{{ reporte.id }}
                     </h5>
                 </div>
                 <div class="card-body">
-                    <h4>{{ reporte.titulo }}</h4>
-                    <p class="text-muted">{{ reporte.descripcion }}</p>
+                    <h4 class="mb-2">{{ reporte.titulo }}</h4>
+                    <p class="text-muted mb-3">{{ reporte.descripcion }}</p>
+                    
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Tipo</small>
+                            <span class="badge bg-secondary">{{ reporte.get_tipo_display }}</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Estado</small>
+                            <span class="badge badge-estado-{{ reporte.estado.nombre|lower|cut:' ' }}">
+                                {{ reporte.estado.nombre }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Prioridad</small>
+                            <span class="badge badge-prioridad-{{ reporte.prioridad.nombre|lower }}">
+                                {{ reporte.prioridad.nombre }}
+                            </span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Fecha</small>
+                            <small>{{ reporte.reportado_en|date:"d/m/Y" }}</small>
+                        </div>
+                    </div>
                     
                     <hr>
                     
                     <div class="mb-2">
-                        <strong>Tipo:</strong> 
-                        <span class="badge bg-secondary">{{ reporte.get_tipo_display }}</span>
-                    </div>
-                    
-                    <div class="mb-2">
-                        <strong>Estado Actual:</strong> 
-                        <span class="badge badge-estado-{{ reporte.estado.nombre|lower|cut:' ' }}">
-                            {{ reporte.estado.nombre }}
-                        </span>
-                    </div>
-                    
-                    <div class="mb-2">
-                        <strong>Prioridad:</strong> 
-                        <span class="badge badge-prioridad-{{ reporte.prioridad.nombre|lower }}">
-                            {{ reporte.prioridad.nombre }}
-                        </span>
-                    </div>
-                    
-                    <div class="mb-2">
-                        <strong>Ubicación:</strong><br>
-                        <i class="bi bi-geo-alt"></i> {{ reporte.direccion }}
-                    </div>
-                    
-                    <div class="mb-2">
-                        <strong>Reportado por:</strong><br>
-                        {{ reporte.usuario.get_full_name|default:reporte.usuario.username }}
+                        <small class="text-muted"><i class="bi bi-geo-alt"></i> Ubicación:</small><br>
+                        <small>{{ reporte.direccion }}</small>
                     </div>
                     
                     <div class="mb-0">
-                        <strong>Fecha:</strong> {{ reporte.reportado_en|date:"d/m/Y H:i" }}
+                        <small class="text-muted"><i class="bi bi-person"></i> Reportado por:</small><br>
+                        <small>{{ reporte.usuario.get_full_name|default:reporte.usuario.username }}</small>
                     </div>
                 </div>
             </div>
 
-            <!-- Evidencias -->
-            {% if reporte.evidencias.exists %}
-            <div class="card border-0 shadow-sm">
+            <!-- Evidencias del Ciudadano -->
+            <div class="card border-0 shadow-sm mb-3">
                 <div class="card-header bg-secondary text-white">
                     <h6 class="mb-0">
-                        <i class="bi bi-images"></i> Evidencias ({{ reporte.evidencias.count }})
+                        <i class="bi bi-images"></i> Evidencias del Ciudadano
                     </h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-2">
+                    {% with tiene_evidencias_ciudadano=False %}
                     <div class="row g-2">
                         {% for evidencia in reporte.evidencias.all %}
-                        <div class="col-4">
-                            {% if evidencia.tipo_evidencia == 'foto' %}
-                            <a href="{{ evidencia.archivo.url }}" target="_blank">
-                                <img src="{{ evidencia.archivo.url }}" 
-                                     class="img-thumbnail" 
-                                     alt="Evidencia">
-                            </a>
-                            {% else %}
-                            <a href="{{ evidencia.archivo.url }}" target="_blank" class="btn btn-sm btn-primary w-100">
-                                <i class="bi bi-file-earmark"></i> Ver {{ evidencia.tipo_evidencia }}
-                            </a>
+                            {% if not evidencia.es_evidencia_reparacion %}
+                                <div class="col-6">
+                                    <div class="card h-100 border">
+                                        {% if evidencia.tipo_evidencia == 'foto' %}
+                                            <a href="{{ evidencia.archivo.url }}" target="_blank">
+                                                <img src="{{ evidencia.archivo.url }}" 
+                                                     class="card-img-top" 
+                                                     alt="Evidencia"
+                                                     style="height: 150px; object-fit: cover; cursor: pointer;">
+                                            </a>
+                                        {% elif evidencia.tipo_evidencia == 'video' %}
+                                            <video controls class="card-img-top" style="height: 150px; object-fit: cover;">
+                                                <source src="{{ evidencia.archivo.url }}" type="video/mp4">
+                                            </video>
+                                        {% else %}
+                                            <div class="card-body text-center p-2">
+                                                <i class="bi bi-file-earmark" style="font-size: 2rem; color: #6c757d;"></i>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="card-footer p-2 bg-light">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted" style="font-size: 0.7rem;">
+                                                    <i class="bi bi-person"></i> Ciudadano
+                                                    <br>{{ evidencia.fechaSubida|date:"d/m/Y" }}
+                                                </small>
+                                                <a href="{{ evidencia.archivo.url }}" 
+                                                   download 
+                                                   class="btn btn-sm btn-primary py-0 px-1">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             {% endif %}
-                        </div>
                         {% endfor %}
                     </div>
+                    
+                    {% if not reporte.evidencias.all|length %}
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i> El ciudadano no subió evidencias
+                    </div>
+                    {% endif %}
+                    {% endwith %}
                 </div>
             </div>
-            {% endif %}
+
+            <!-- Evidencias de Reparación (Técnico) -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-tools"></i> Evidencias de Reparación
+                    </h6>
+                </div>
+                <div class="card-body p-2">
+                    {% with tiene_evidencias_reparacion=False %}
+                    <div class="row g-2">
+                        {% for evidencia in reporte.evidencias.all %}
+                            {% if evidencia.es_evidencia_reparacion %}
+                                <div class="col-6">
+                                    <div class="card h-100 border border-success">
+                                        {% if evidencia.tipo_evidencia == 'foto' %}
+                                            <a href="{{ evidencia.archivo.url }}" target="_blank">
+                                                <img src="{{ evidencia.archivo.url }}" 
+                                                     class="card-img-top" 
+                                                     alt="Evidencia de reparación"
+                                                     style="height: 150px; object-fit: cover; cursor: pointer;">
+                                            </a>
+                                        {% elif evidencia.tipo_evidencia == 'video' %}
+                                            <video controls class="card-img-top" style="height: 150px; object-fit: cover;">
+                                                <source src="{{ evidencia.archivo.url }}" type="video/mp4">
+                                            </video>
+                                        {% else %}
+                                            <div class="card-body text-center p-2">
+                                                <i class="bi bi-file-earmark" style="font-size: 2rem; color: #198754;"></i>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="card-footer p-2 bg-success bg-opacity-10">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted" style="font-size: 0.7rem;">
+                                                    <i class="bi bi-tools"></i> Técnico
+                                                    <br>{{ evidencia.fechaSubida|date:"d/m/Y H:i" }}
+                                                </small>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ evidencia.archivo.url }}" 
+                                                       download 
+                                                       class="btn btn-success py-0 px-2"
+                                                       data-bs-toggle="tooltip"
+                                                       title="Descargar">
+                                                        <i class="bi bi-download"></i>
+                                                    </a>
+                                                    {% if evidencia.subida_por.id == request.user.id %}
+                                                    <a href="{% url 'usuarios:borrar_evidencia_reparacion' evidencia.pk %}" 
+                                                       class="btn btn-danger py-0 px-2"
+                                                       data-bs-toggle="tooltip"
+                                                       title="Eliminar">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endwith %}
+                </div>
+            </div>
         </div>
 
-        <!-- Formulario para Cambiar Estado -->
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm">
+        <!-- COLUMNA DERECHA: Formulario y Acciones -->
+        <div class="col-lg-7">
+            <!-- Formulario de Actualización -->
+            <div class="card border-0 shadow-sm mb-3">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
-                        <i class="bi bi-arrow-repeat"></i> Cambiar Estado
+                        <i class="bi bi-arrow-repeat"></i> Actualizar Estado del Reporte
                     </h5>
                 </div>
                 <div class="card-body">
                     <form method="POST">
                         {% csrf_token %}
                         
-                        <div class="mb-3">
-                            <label for="estado" class="form-label">Nuevo Estado *</label>
-                            <select class="form-select" id="estado" name="estado" required>
-                                <option value="">Seleccionar...</option>
-                                {% for estado in estados %}
-                                <option value="{{ estado.id }}" 
-                                        {% if estado.id == reporte.estado.id %}selected{% endif %}>
-                                    {{ estado.nombre }}
-                                </option>
-                                {% endfor %}
-                            </select>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="estado" class="form-label fw-bold">
+                                    <i class="bi bi-flag"></i> Nuevo Estado *
+                                </label>
+                                <select class="form-select" id="estado" name="estado" required>
+                                    <option value="">Seleccionar...</option>
+                                    {% for estado in estados %}
+                                    <option value="{{ estado.id }}" {% if estado.id == reporte.estado.id %}selected{% endif %}>
+                                        {{ estado.nombre }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="tiempo_empleado" class="form-label fw-bold">
+                                    <i class="bi bi-clock"></i> Tiempo Empleado
+                                </label>
+                                <input type="text" class="form-control" id="tiempo_empleado" 
+                                       name="tiempo_empleado" 
+                                       placeholder="Ej: 2 horas">
+                            </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="notas" class="form-label">Notas / Observaciones</label>
-                            <textarea class="form-control" id="notas" name="notas" rows="4" 
-                                      placeholder="Describe el trabajo realizado, materiales usados, etc."></textarea>
+                            <label for="materiales_usados" class="form-label fw-bold">
+                                <i class="bi bi-tools"></i> Materiales Usados
+                            </label>
+                            <input type="text" class="form-control" id="materiales_usados" 
+                                   name="materiales_usados" 
+                                   placeholder="Ej: Asfalto, cemento, señales...">
                         </div>
                         
-                        <div class="alert alert-info">
+                        <div class="mb-3">
+                            <label for="comentarios" class="form-label fw-bold">
+                                <i class="bi bi-chat-left-text"></i> Comentarios u Observaciones
+                            </label>
+                            <textarea class="form-control" id="comentarios" name="comentarios" rows="4" 
+                                      placeholder="Describe el trabajo realizado, problemas encontrados o recomendaciones..."></textarea>
+                        </div>
+                        
+                        <div class="alert alert-info mb-3">
                             <i class="bi bi-info-circle"></i> 
-                            El ciudadano recibirá una notificación del cambio de estado.
+                            El ciudadano será notificado automáticamente del cambio de estado.
                         </div>
                         
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-check-circle"></i> Actualizar Estado
-                        </button>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Actualizar Estado
+                            </button>
+                            <a href="{% url 'reportes:subir_evidencia_reparacion' reporte.pk %}" 
+                               class="btn btn-outline-success">
+                                <i class="bi bi-camera"></i> Subir Evidencia de Reparación
+                            </a>
+                        </div>
                     </form>
                 </div>
             </div>
 
-            <!-- Subir Evidencia de Reparación -->
-            <div class="card border-0 shadow-sm mt-3">
-                <div class="card-header bg-success text-white">
-                    <h6 class="mb-0">
-                        <i class="bi bi-camera"></i> Subir Evidencia de Reparación
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <a href="{% url 'reportes:subir_evidencia_reparacion' reporte.pk %}" 
-                       class="btn btn-success w-100">
-                        <i class="bi bi-upload"></i> Subir Foto/Video
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Historial -->
-    <div class="row mt-4">
-        <div class="col-12">
+            <!-- Historial de Cambios -->
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0">
+                    <h6 class="mb-0">
                         <i class="bi bi-clock-history"></i> Historial de Cambios
-                    </h5>
+                    </h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
                     {% if reporte.historial.exists %}
-                    <div class="timeline">
                         {% for registro in reporte.historial.all %}
-                        <div class="timeline-item mb-3">
-                            <strong>{{ registro.accion }}</strong><br>
-                            <small class="text-muted">
-                                Por: {{ registro.usuario.username|default:"Sistema" }} • 
-                                {{ registro.fecha_accion|date:"d/m/Y H:i" }}
+                        <div class="border-start border-primary border-3 ps-3 pb-3 mb-3">
+                            <h6 class="mb-1">
+                                <i class="bi bi-circle-fill text-primary" style="font-size: 0.5rem;"></i>
+                                {{ registro.accion }}
+                            </h6>
+                            <small class="text-muted d-block mb-2">
+                                <i class="bi bi-person"></i> {{ registro.usuario.username|default:"Sistema" }} • 
+                                <i class="bi bi-calendar"></i> {{ registro.fecha_accion|date:"d/m/Y H:i" }}
                             </small>
-                            <p class="mt-1 small">{{ registro.detalles }}</p>
+                            <p class="mb-0 small" style="white-space: pre-line;">{{ registro.detalles }}</p>
                         </div>
                         {% endfor %}
-                    </div>
                     {% else %}
-                    <p class="text-muted text-center">No hay historial disponible.</p>
+                        <p class="text-muted text-center mb-0">No hay historial disponible.</p>
                     {% endif %}
                 </div>
             </div>
