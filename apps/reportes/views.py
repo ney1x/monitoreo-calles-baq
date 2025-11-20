@@ -184,3 +184,73 @@ def mapa_reportes(request):
         'reportes': reportes,
     }
     return render(request, 'reportes/mapa_reportes.html', context)
+
+@login_required
+def crear_reporte_desde_mapa(request):
+    """Vista para crear un reporte desde el mapa interactivo"""
+    if request.method == 'POST':
+        # Obtener datos del formulario
+        latitud = request.POST.get('latitud')
+        longitud = request.POST.get('longitud')
+        tipo = request.POST.get('tipo')
+        titulo = request.POST.get('titulo')
+        descripcion = request.POST.get('descripcion')
+        evidencia_archivo = request.FILES.get('evidencia')
+        
+        # Obtener dirección desde coordenadas (Nominatim)
+        try:
+            import requests
+            url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={latitud}&lon={longitud}"
+            response = requests.get(url)
+            data = response.json()
+            direccion = data.get('display_name', f'Lat: {latitud}, Lng: {longitud}')
+        except:
+            direccion = f'Lat: {latitud}, Lng: {longitud}'
+        
+        # Crear reporte
+        reporte = Reporte()
+        reporte.usuario = request.user
+        reporte.titulo = titulo
+        reporte.tipo = tipo
+        reporte.descripcion = descripcion
+        reporte.latitud = latitud
+        reporte.longitud = longitud
+        reporte.direccion = direccion
+        
+        # Asignar estado inicial "Nuevo"
+        estado_nuevo = EstadoReporte.objects.filter(nombre='Nuevo').first()
+        if estado_nuevo:
+            reporte.estado = estado_nuevo
+        
+        # Asignar prioridad por defecto "Media"
+        prioridad_media = PrioridadReporte.objects.filter(nombre='Media').first()
+        if prioridad_media:
+            reporte.prioridad = prioridad_media
+        
+        reporte.save()
+        
+        # Procesar evidencia si se subió
+        if evidencia_archivo:
+            extension = os.path.splitext(evidencia_archivo.name)[1].lower()
+            if extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']:
+                tipo_ev = 'foto'
+            elif extension in ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm']:
+                tipo_ev = 'video'
+            else:
+                tipo_ev = 'documento'
+            
+            Evidencia.objects.create(
+                reporte=reporte,
+                tipo_evidencia=tipo_ev,
+                archivo=evidencia_archivo,
+                nombre_archivo=evidencia_archivo.name,
+                tamano_bytes=evidencia_archivo.size,
+                subida_por=request.user,
+                es_evidencia_reparacion=False
+            )
+        
+        messages.success(request, '¡Reporte creado exitosamente desde el mapa!')
+        return redirect('reportes:detalle_reporte', pk=reporte.pk)
+    
+    return redirect('reportes:mapa')
+

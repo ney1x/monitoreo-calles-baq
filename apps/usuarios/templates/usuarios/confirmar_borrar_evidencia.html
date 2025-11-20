@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirmar Eliminación - Evidencia{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm mt-5">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+                    </div>
+
+                    <h6 class="mb-3">¿Estás seguro de eliminar esta evidencia?</h6>
+
+                    <!-- Preview de la evidencia -->
+                    <div class="card mb-3">
+                        {% if evidencia.tipo_evidencia == 'foto' %}
+                            <img src="{{ evidencia.archivo.url }}" 
+                                 class="card-img-top" 
+                                 alt="Evidencia"
+                                 style="max-height: 300px; object-fit: cover;">
+                        {% elif evidencia.tipo_evidencia == 'video' %}
+                            <video controls class="card-img-top" style="max-height: 300px;">
+                                <source src="{{ evidencia.archivo.url }}" type="video/mp4">
+                            </video>
+                        {% else %}
+                            <div class="card-body text-center py-5">
+                                <i class="bi bi-file-earmark" style="font-size: 4rem; color: #6c757d;"></i>
+                                <p class="mt-3 mb-0">{{ evidencia.nombre_archivo }}</p>
+                            </div>
+                        {% endif %}
+                        <div class="card-footer">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar"></i> Subida el {{ evidencia.fechaSubida|date:"d/m/Y H:i" }}
+                            </small>
+                        </div>
+                    </div>
+
+                    <p class="text-muted small mb-4">
+                        <strong>Reporte:</strong> #{{ reporte.id }} - {{ reporte.titulo }}<br>
+                        <strong>Archivo:</strong> {{ evidencia.nombre_archivo }}
+                    </p>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-trash"></i> Sí, Eliminar Evidencia
+                            </button>
+                            <a href="{% url 'reportes:cambiar_estado_reporte' reporte.pk %}" 
+                               class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

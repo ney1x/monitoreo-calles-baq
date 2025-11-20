@@ -22,4 +22,8 @@ urlpatterns = [
     # SE Autoridades
     path('asignar-tecnico/<int:pk>/', usuarios_views.asignar_tecnico, name='asignar_tecnico'),
     path('lista-autoridad/', usuarios_views.lista_reportes_autoridad, name='lista_reportes_autoridad'),
+
+    # Crear reporte desde mapa
+    path('crear-desde-mapa/', views.crear_reporte_desde_mapa, name='crear_reporte_desde_mapa'),
+
 ]
