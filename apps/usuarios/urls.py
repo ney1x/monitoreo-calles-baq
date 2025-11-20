@@ -20,4 +20,7 @@ urlpatterns = [
     path('ciudadano/', views.ciudadano_home, name='ciudadano_home'),
     path('tecnico/', views.tecnico_home, name='tecnico_home'),
     path('autoridad/', views.autoridad_home, name='autoridad_home'),
+    
+    # SE Borrar evidencia de reparación (AGREGAR ESTA LÍNEA)
+    path('evidencia/borrar/<int:pk>/', views.borrar_evidencia_reparacion, name='borrar_evidencia_reparacion'),
 ]

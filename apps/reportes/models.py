@@ -169,8 +169,6 @@ class Reporte(models.Model):
 class Evidencia(models.Model):
     """
     Evidencias multimedia de un reporte.
-    Según diagrama: id, reporte_id, tipo_evidencia, url_almacenamiento, 
-    nombre_archivo, tamano_bytes, fechaSubida
     """
     
     TIPO_EVIDENCIA = (
@@ -191,6 +189,16 @@ class Evidencia(models.Model):
     nombre_archivo = models.CharField(max_length=255)
     tamano_bytes = models.BigIntegerField(default=0)
     
+    # AGREGAR ESTOS CAMPOS
+    subida_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='evidencias_subidas'
+    )
+    es_evidencia_reparacion = models.BooleanField(default=False)
+    
     fechaSubida = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -198,7 +206,8 @@ class Evidencia(models.Model):
         verbose_name_plural = "Evidencias"
 
     def __str__(self):
-        return f"{self.tipo_evidencia} - Reporte #{self.reporte.id}"
+        tipo = "Reparación" if self.es_evidencia_reparacion else "Ciudadano"
+        return f"{self.tipo_evidencia} ({tipo}) - Reporte #{self.reporte.id}"
 
     def save(self, *args, **kwargs):
         # Calcular tamaño automáticamente

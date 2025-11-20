@@ -107,10 +107,9 @@ class ReporteAdmin(admin.ModelAdmin):
 
 @admin.register(Evidencia)
 class EvidenciaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'reporte', 'tipo_evidencia', 'nombre_archivo', 'fechaSubida')
-    list_filter = ('tipo_evidencia', 'fechaSubida')
+    list_display = ('id', 'reporte', 'tipo_evidencia', 'nombre_archivo', 'es_evidencia_reparacion', 'subida_por', 'fechaSubida')
+    list_filter = ('tipo_evidencia', 'es_evidencia_reparacion', 'fechaSubida')
     readonly_fields = ('fechaSubida', 'tamano_bytes')
-
 
 @admin.register(Asignacion)
 class AsignacionAdmin(admin.ModelAdmin):

@@ -74,7 +74,6 @@
                     </h6>
                 </div>
                 <div class="card-body p-2">
-                    {% with tiene_evidencias_ciudadano=False %}
                     <div class="row g-2">
                         {% for evidencia in reporte.evidencias.all %}
                             {% if not evidencia.es_evidencia_reparacion %}
@@ -116,12 +115,11 @@
                         {% endfor %}
                     </div>
                     
-                    {% if not reporte.evidencias.all|length %}
+                    {% if not reporte.evidencias.all %}
                     <div class="alert alert-info mb-0">
                         <i class="bi bi-info-circle"></i> El ciudadano no subió evidencias
                     </div>
                     {% endif %}
-                    {% endwith %}
                 </div>
             </div>
 
@@ -133,7 +131,6 @@
                     </h6>
                 </div>
                 <div class="card-body p-2">
-                    {% with tiene_evidencias_reparacion=False %}
                     <div class="row g-2">
                         {% for evidencia in reporte.evidencias.all %}
                             {% if evidencia.es_evidencia_reparacion %}
@@ -170,11 +167,12 @@
                                                        title="Descargar">
                                                         <i class="bi bi-download"></i>
                                                     </a>
-                                                    {% if evidencia.subida_por.id == request.user.id %}
+                                                    {% if evidencia.subida_por and evidencia.subida_por.id == request.user.id %}
                                                     <a href="{% url 'usuarios:borrar_evidencia_reparacion' evidencia.pk %}" 
                                                        class="btn btn-danger py-0 px-2"
                                                        data-bs-toggle="tooltip"
-                                                       title="Eliminar">
+                                                       title="Eliminar"
+                                                       onclick="return confirm('¿Estás seguro de eliminar esta evidencia?');">
                                                         <i class="bi bi-trash"></i>
                                                     </a>
                                                     {% endif %}
@@ -186,7 +184,6 @@
                             {% endif %}
                         {% endfor %}
                     </div>
-                    {% endwith %}
                 </div>
             </div>
         </div>

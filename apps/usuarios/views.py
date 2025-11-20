@@ -393,13 +393,15 @@ def subir_evidencia_reparacion(request, pk):
             else:
                 tipo = 'documento'
             
-            # SE Crear evidencia
+            # SE Crear evidencia MARCADA COMO REPARACIÓN
             Evidencia.objects.create(
                 reporte=reporte,
                 tipo_evidencia=tipo,
                 archivo=archivo,
                 nombre_archivo=archivo.name,
-                tamano_bytes=archivo.size
+                tamano_bytes=archivo.size,
+                subida_por=request.user,  # Identifica quién subió la evidencia
+                es_evidencia_reparacion=True  # Marca que es evidencia de reparación
             )
             
             # SE Registrar en historial
@@ -410,8 +412,16 @@ def subir_evidencia_reparacion(request, pk):
                 detalles=f'Archivo: {archivo.name}. {notas}'
             )
             
-            messages.success(request, 'Evidencia subida correctamente.')
-            return redirect('usuarios:tecnico_home')
+            # SE Notificar al ciudadano (opcional)
+            Notificacion.objects.create(
+                usuario=reporte.usuario,
+                reporte=reporte,
+                canal='app',
+                mensaje=f'Se ha subido evidencia de reparación para tu reporte: {reporte.titulo}'
+            )
+            
+            messages.success(request, 'Evidencia de reparación subida correctamente.')
+            return redirect('reportes:cambiar_estado_reporte', pk=reporte.pk)
         else:
             messages.error(request, 'Debes seleccionar un archivo.')
     
@@ -523,3 +533,115 @@ def lista_reportes_autoridad(request):
         'en_proceso': en_proceso,
         'resueltos': resueltos,
     })
+
+@login_required
+def cambiar_estado_reporte(request, pk):
+    """Permite al técnico cambiar el estado de un reporte asignado"""
+    reporte = get_object_or_404(Reporte, pk=pk)
+    
+    # Verificar que el técnico tenga este reporte asignado
+    if not Asignacion.objects.filter(reporte=reporte, tecnico=request.user).exists():
+        messages.error(request, 'Este reporte no está asignado a ti.')
+        return redirect('usuarios:tecnico_home')
+    
+    if request.method == 'POST':
+        nuevo_estado_id = request.POST.get('estado')
+        comentarios = request.POST.get('comentarios', '')
+        materiales_usados = request.POST.get('materiales_usados', '')
+        tiempo_empleado = request.POST.get('tiempo_empleado', '')
+        
+        if not nuevo_estado_id:
+            messages.error(request, 'Debes seleccionar un estado.')
+            return redirect('reportes:cambiar_estado_reporte', pk=pk)
+        
+        nuevo_estado = get_object_or_404(EstadoReporte, id=nuevo_estado_id)
+        
+        # Cambiar estado
+        estado_anterior = reporte.estado
+        reporte.estado = nuevo_estado
+        reporte.save()
+        
+        # Construir detalles completos
+        detalles_partes = [f'Estado cambió de "{estado_anterior.nombre}" a "{nuevo_estado.nombre}"']
+        
+        if comentarios:
+            detalles_partes.append(f'Comentarios: {comentarios}')
+        
+        if materiales_usados:
+            detalles_partes.append(f'Materiales usados: {materiales_usados}')
+        
+        if tiempo_empleado:
+            detalles_partes.append(f'Tiempo empleado: {tiempo_empleado}')
+        
+        detalles_completos = '\n'.join(detalles_partes)
+        
+        # Registrar en historial
+        HistorialReporte.objects.create(
+            reporte=reporte,
+            usuario=request.user,
+            accion='Cambio de estado',
+            detalles=detalles_completos
+        )
+        
+        # Crear notificación para el ciudadano
+        mensaje_notificacion = f'Tu reporte "{reporte.titulo}" cambió a estado: {nuevo_estado.nombre}'
+        if comentarios:
+            mensaje_notificacion += f'. Comentario del técnico: {comentarios[:100]}'
+        
+        Notificacion.objects.create(
+            usuario=reporte.usuario,
+            reporte=reporte,
+            canal='app',
+            mensaje=mensaje_notificacion
+        )
+        
+        messages.success(request, f'Estado actualizado exitosamente a: {nuevo_estado.nombre}')
+        return redirect('usuarios:tecnico_home')
+    
+    # GET: Mostrar formulario
+    estados = EstadoReporte.objects.all().order_by('nombre')
+    
+    return render(request, 'reportes/cambiar_estado.html', {
+        'reporte': reporte,
+        'estados': estados
+    })
+
+@login_required
+def borrar_evidencia_reparacion(request, pk):
+    """Permite al técnico borrar sus propias evidencias de reparación"""
+    evidencia = get_object_or_404(Evidencia, pk=pk)
+    
+    # Verificar que sea del técnico actual
+    if evidencia.subida_por != request.user:
+        messages.error(request, 'No puedes eliminar esta evidencia.')
+        return redirect('usuarios:tecnico_home')
+    
+    # Verificar que sea evidencia de reparación
+    if not evidencia.es_evidencia_reparacion:
+        messages.error(request, 'Solo puedes eliminar evidencias de reparación.')
+        return redirect('usuarios:tecnico_home')
+    
+    reporte_id = evidencia.reporte.pk
+    nombre_archivo = evidencia.nombre_archivo
+    
+    # Eliminar archivo físico (opcional)
+    if evidencia.archivo:
+        try:
+            evidencia.archivo.delete()
+        except:
+            pass
+    
+    # Eliminar registro
+    evidencia.delete()
+    
+    # Registrar en historial
+    HistorialReporte.objects.create(
+        reporte_id=reporte_id,
+        usuario=request.user,
+        accion='Evidencia de reparación eliminada',
+        detalles=f'Archivo eliminado: {nombre_archivo}'
+    )
+    
+    messages.success(request, 'Evidencia eliminada correctamente.')
+    return redirect('reportes:cambiar_estado_reporte', pk=reporte_id)
+
