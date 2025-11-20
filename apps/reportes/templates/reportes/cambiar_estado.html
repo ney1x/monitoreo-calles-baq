@@ -127,7 +127,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-success text-white">
                     <h6 class="mb-0">
-                        <i class="bi bi-tools"></i> Evidencias de Reparación
+                        <i class="bi bi-tools"></i> Mis Evidencias de Reparación
                     </h6>
                 </div>
                 <div class="card-body p-2">
@@ -194,28 +194,16 @@
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
-                        <i class="bi bi-arrow-repeat"></i> Actualizar Estado del Reporte
+                        <i class="bi bi-arrow-repeat"></i> Marcar como Resuelto
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST">
+                    <form method="POST" enctype="multipart/form-data" id="formActualizarReporte">
                         {% csrf_token %}
                         
+                        <input type="hidden" name="estado" value="{% for estado in estados %}{% if estado.nombre == 'Resuelto' %}{{ estado.id }}{% endif %}{% endfor %}">
+                        
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="estado" class="form-label fw-bold">
-                                    <i class="bi bi-flag"></i> Nuevo Estado *
-                                </label>
-                                <select class="form-select" id="estado" name="estado" required>
-                                    <option value="">Seleccionar...</option>
-                                    {% for estado in estados %}
-                                    <option value="{{ estado.id }}" {% if estado.id == reporte.estado.id %}selected{% endif %}>
-                                        {{ estado.nombre }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            
                             <div class="col-md-6 mb-3">
                                 <label for="tiempo_empleado" class="form-label fw-bold">
                                     <i class="bi bi-clock"></i> Tiempo Empleado
@@ -224,38 +212,78 @@
                                        name="tiempo_empleado" 
                                        placeholder="Ej: 2 horas">
                             </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="materiales_usados" class="form-label fw-bold">
-                                <i class="bi bi-tools"></i> Materiales Usados
-                            </label>
-                            <input type="text" class="form-control" id="materiales_usados" 
-                                   name="materiales_usados" 
-                                   placeholder="Ej: Asfalto, cemento, señales...">
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="materiales_usados" class="form-label fw-bold">
+                                    <i class="bi bi-tools"></i> Materiales Usados
+                                </label>
+                                <input type="text" class="form-control" id="materiales_usados" 
+                                       name="materiales_usados" 
+                                       placeholder="Ej: Asfalto, cemento...">
+                            </div>
                         </div>
                         
                         <div class="mb-3">
                             <label for="comentarios" class="form-label fw-bold">
-                                <i class="bi bi-chat-left-text"></i> Comentarios u Observaciones
+                                <i class="bi bi-chat-left-text"></i> Comentarios u Observaciones *
                             </label>
                             <textarea class="form-control" id="comentarios" name="comentarios" rows="4" 
-                                      placeholder="Describe el trabajo realizado, problemas encontrados o recomendaciones..."></textarea>
+                                      placeholder="Describe el trabajo realizado, problemas encontrados o recomendaciones..." required
+                                      onkeyup="validarFormulario()"></textarea>
+                            <small class="text-danger" id="errorComentarios" style="display: none;">
+                                Debes agregar comentarios sobre el trabajo realizado (mínimo 10 caracteres)
+                            </small>
                         </div>
-                        
-                        <div class="alert alert-info mb-3">
-                            <i class="bi bi-info-circle"></i> 
-                            El ciudadano será notificado automáticamente del cambio de estado.
+
+                        <hr>
+
+                        <!-- Sección de Evidencias -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-camera-fill"></i> Evidencia de Reparación *
+                            </label>
+                            
+                            <!-- Mostrar evidencias ya subidas -->
+                            {% if evidencias_previas_count > 0 %}
+                                <div class="alert alert-success mb-3">
+                                    <i class="bi bi-check-circle"></i> Ya has subido {{ evidencias_previas_count }} evidencia(s) de reparación
+                                </div>
+                            {% endif %}
+
+                            <!-- Subir nueva evidencia -->
+                            <input type="file" 
+                                   class="form-control" 
+                                   id="evidencia" 
+                                   name="evidencia" 
+                                   accept="image/*,video/*"
+                                   onchange="validarFormulario(); previsualizarArchivo()">
+                            <div class="form-text">
+                                Sube una foto o video del trabajo completado (JPG, PNG, MP4)
+                            </div>
+                            <small class="text-danger" id="errorEvidencia" style="display: none;">
+                                Debes subir al menos una evidencia de la reparación
+                            </small>
+
+                            <!-- Preview de la imagen -->
+                            <div id="previewContainer" style="display: none;" class="mt-2">
+                                <img id="previewImage" class="img-thumbnail" style="max-height: 150px;">
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            <strong>Importante:</strong>
+                            <ul class="mb-0 mt-2 small">
+                                <li>Debes agregar comentarios sobre el trabajo realizado</li>
+                                <li>Debes subir evidencia fotográfica de la reparación</li>
+                                <li>El ciudadano será notificado automáticamente</li>
+                            </ul>
                         </div>
                         
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-check-circle"></i> Actualizar Estado
+                            <button type="submit" class="btn btn-success btn-lg" id="btnActualizar" disabled>
+                                <i class="bi bi-check-circle"></i> Marcar como Resuelto
                             </button>
-                            <a href="{% url 'reportes:subir_evidencia_reparacion' reporte.pk %}" 
-                               class="btn btn-outline-success">
-                                <i class="bi bi-camera"></i> Subir Evidencia de Reparación
-                            </a>
                         </div>
                     </form>
                 </div>
@@ -291,4 +319,59 @@
         </div>
     </div>
 </div>
+
+<script>
+// Validar formulario en tiempo real
+function validarFormulario() {
+    const comentarios = document.getElementById('comentarios').value.trim();
+    const evidencia = document.getElementById('evidencia').files.length;
+    const btnActualizar = document.getElementById('btnActualizar');
+    const errorComentarios = document.getElementById('errorComentarios');
+    const errorEvidencia = document.getElementById('errorEvidencia');
+    
+    // Obtener el conteo de evidencias previas desde el servidor
+    const evidenciasPrevias = {{ evidencias_previas_count|default:0 }};
+    
+    let valido = true;
+    
+    // Validar comentarios
+    if (comentarios.length < 10) {
+        errorComentarios.style.display = 'block';
+        valido = false;
+    } else {
+        errorComentarios.style.display = 'none';
+    }
+    
+    // Validar evidencia (nueva o previa)
+    if (evidencia === 0 && evidenciasPrevias === 0) {
+        errorEvidencia.style.display = 'block';
+        valido = false;
+    } else {
+        errorEvidencia.style.display = 'none';
+    }
+    
+    btnActualizar.disabled = !valido;
+}
+
+// Previsualizar imagen
+function previsualizarArchivo() {
+    const file = document.getElementById('evidencia').files[0];
+    const preview = document.getElementById('previewImage');
+    const container = document.getElementById('previewContainer');
+    
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            container.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+// Validar al cargar la página
+document.addEventListener('DOMContentLoaded', validarFormulario);
+</script>
 {% endblock %}

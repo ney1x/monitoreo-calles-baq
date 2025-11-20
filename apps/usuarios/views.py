@@ -539,71 +539,119 @@ def cambiar_estado_reporte(request, pk):
     """Permite al técnico cambiar el estado de un reporte asignado"""
     reporte = get_object_or_404(Reporte, pk=pk)
     
-    # Verificar que el técnico tenga este reporte asignado
+    # SE Verificar que el técnico tenga este reporte asignado
     if not Asignacion.objects.filter(reporte=reporte, tecnico=request.user).exists():
         messages.error(request, 'Este reporte no está asignado a ti.')
         return redirect('usuarios:tecnico_home')
     
     if request.method == 'POST':
         nuevo_estado_id = request.POST.get('estado')
-        comentarios = request.POST.get('comentarios', '')
-        materiales_usados = request.POST.get('materiales_usados', '')
+        comentarios = request.POST.get('comentarios', '').strip()
         tiempo_empleado = request.POST.get('tiempo_empleado', '')
+        materiales_usados = request.POST.get('materiales_usados', '')
+        evidencia_archivo = request.FILES.get('evidencia')
         
-        if not nuevo_estado_id:
-            messages.error(request, 'Debes seleccionar un estado.')
-            return redirect('reportes:cambiar_estado_reporte', pk=pk)
+        # VALIDACIONES
+        if not comentarios or len(comentarios) < 10:
+            messages.error(request, 'Debes agregar comentarios detallados sobre el trabajo realizado (mínimo 10 caracteres).')
+            estados = EstadoReporte.objects.all()
+            evidencias_previas_count = Evidencia.objects.filter(
+                reporte=reporte,
+                es_evidencia_reparacion=True,
+                subida_por=request.user
+            ).count()
+            return render(request, 'reportes/cambiar_estado.html', {
+                'reporte': reporte,
+                'estados': estados,
+                'evidencias_previas_count': evidencias_previas_count
+            })
+        
+        # Verificar si hay evidencias previas o nueva
+        evidencias_previas = Evidencia.objects.filter(
+            reporte=reporte,
+            es_evidencia_reparacion=True,
+            subida_por=request.user
+        ).exists()
+        
+        if not evidencia_archivo and not evidencias_previas:
+            messages.error(request, 'Debes subir al menos una evidencia fotográfica de la reparación.')
+            estados = EstadoReporte.objects.all()
+            evidencias_previas_count = 0
+            return render(request, 'reportes/cambiar_estado.html', {
+                'reporte': reporte,
+                'estados': estados,
+                'evidencias_previas_count': evidencias_previas_count
+            })
         
         nuevo_estado = get_object_or_404(EstadoReporte, id=nuevo_estado_id)
         
-        # Cambiar estado
+        # SE Cambiar estado
         estado_anterior = reporte.estado
         reporte.estado = nuevo_estado
         reporte.save()
         
-        # Construir detalles completos
-        detalles_partes = [f'Estado cambió de "{estado_anterior.nombre}" a "{nuevo_estado.nombre}"']
+        # SE Subir evidencia si se proporcionó
+        if evidencia_archivo:
+            # Determinar tipo
+            if evidencia_archivo.content_type.startswith('image'):
+                tipo = 'foto'
+            elif evidencia_archivo.content_type.startswith('video'):
+                tipo = 'video'
+            else:
+                tipo = 'documento'
+            
+            Evidencia.objects.create(
+                reporte=reporte,
+                tipo_evidencia=tipo,
+                archivo=evidencia_archivo,
+                nombre_archivo=evidencia_archivo.name,
+                tamano_bytes=evidencia_archivo.size,
+                subida_por=request.user,
+                es_evidencia_reparacion=True
+            )
         
-        if comentarios:
-            detalles_partes.append(f'Comentarios: {comentarios}')
-        
-        if materiales_usados:
-            detalles_partes.append(f'Materiales usados: {materiales_usados}')
-        
+        # SE Construir detalles
+        detalles_parts = [f'{estado_anterior.nombre} → {nuevo_estado.nombre}']
         if tiempo_empleado:
-            detalles_partes.append(f'Tiempo empleado: {tiempo_empleado}')
+            detalles_parts.append(f'Tiempo: {tiempo_empleado}')
+        if materiales_usados:
+            detalles_parts.append(f'Materiales: {materiales_usados}')
+        detalles_parts.append(f'Observaciones: {comentarios}')
         
-        detalles_completos = '\n'.join(detalles_partes)
+        detalles = '\n'.join(detalles_parts)
         
-        # Registrar en historial
+        # SE Registrar en historial
         HistorialReporte.objects.create(
             reporte=reporte,
             usuario=request.user,
             accion='Cambio de estado',
-            detalles=detalles_completos
+            detalles=detalles
         )
         
-        # Crear notificación para el ciudadano
-        mensaje_notificacion = f'Tu reporte "{reporte.titulo}" cambió a estado: {nuevo_estado.nombre}'
-        if comentarios:
-            mensaje_notificacion += f'. Comentario del técnico: {comentarios[:100]}'
-        
+        # SE Crear notificación para el ciudadano
         Notificacion.objects.create(
             usuario=reporte.usuario,
             reporte=reporte,
             canal='app',
-            mensaje=mensaje_notificacion
+            mensaje=f'Tu reporte "{reporte.titulo}" ha sido marcado como: {nuevo_estado.nombre}'
         )
         
-        messages.success(request, f'Estado actualizado exitosamente a: {nuevo_estado.nombre}')
+        messages.success(request, f'Reporte actualizado exitosamente a: {nuevo_estado.nombre}')
         return redirect('usuarios:tecnico_home')
     
-    # GET: Mostrar formulario
-    estados = EstadoReporte.objects.all().order_by('nombre')
+    estados = EstadoReporte.objects.all()
+    
+    # Contar evidencias previas del técnico
+    evidencias_previas_count = Evidencia.objects.filter(
+        reporte=reporte,
+        es_evidencia_reparacion=True,
+        subida_por=request.user
+    ).count()
     
     return render(request, 'reportes/cambiar_estado.html', {
         'reporte': reporte,
-        'estados': estados
+        'estados': estados,
+        'evidencias_previas_count': evidencias_previas_count
     })
 
 @login_required
