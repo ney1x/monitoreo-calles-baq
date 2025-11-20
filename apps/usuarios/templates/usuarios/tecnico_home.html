@@ -90,7 +90,7 @@
                                         <td><strong>#{{ reporte.id }}</strong></td>
                                         <td>
                                             <strong>{{ reporte.titulo }}</strong><br>
-                                            <small class="text-muted">{{ reporte.tipo }}</small>
+                                            <small class="text-muted">{{ reporte.get_tipo_display }}</small>
                                         </td>
                                         <td>
                                             <i class="bi bi-geo-alt"></i>
@@ -110,22 +110,17 @@
                                             <small>{{ reporte.reportado_en|date:"d/m/Y" }}</small>
                                         </td>
                                         <td>
-                                            <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'reportes:cambiar_estado_reporte' reporte.pk %}" 
+                                               class="btn btn-success btn-sm" 
+                                               data-bs-toggle="tooltip" 
+                                               title="Gestionar Reporte">
+                                                <i class="bi bi-tools"></i> Gestionar
                                                 {% if reporte.num_evidencias > 0 %}
-                                                <a href="{% url 'reportes:detalle_reporte' reporte.pk %}" 
-                                                   class="btn btn-outline-primary" 
-                                                   data-bs-toggle="tooltip" 
-                                                   title="Ver Evidencias ({{ reporte.num_evidencias }})">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
+                                                <span class="badge bg-white text-success ms-1">
+                                                    {{ reporte.num_evidencias }} <i class="bi bi-image-fill"></i>
+                                                </span>
                                                 {% endif %}
-                                                <button class="btn btn-outline-success" 
-                                                        data-bs-toggle="tooltip" 
-                                                        title="Cambiar Estado"
-                                                        onclick="cambiarEstado({{ reporte.pk }})">
-                                                    <i class="bi bi-arrow-repeat"></i>
-                                                </button>
-                                            </div>
+                                            </a>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -172,35 +167,4 @@
         </div>
     </div>
 </div>
-
-<!-- Modal para cambiar estado -->
-<div class="modal fade" id="cambiarEstadoModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Cambiar Estado del Reporte</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Esta funcionalidad estará disponible próximamente.</p>
-                <p class="text-muted small">Por ahora, puedes cambiar el estado desde el panel de administración.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    function cambiarEstado(reporteId) {
-        // Mostrar modal (placeholder por ahora)
-        const modal = new bootstrap.Modal(document.getElementById('cambiarEstadoModal'));
-        modal.show();
-        
-        // TODO: Implementar cambio de estado con AJAX
-    }
-</script>
 {% endblock %}
