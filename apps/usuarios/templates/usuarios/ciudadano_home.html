@@ -87,9 +87,6 @@
                     <h5 class="mb-0">
                         <i class="bi bi-clock-history"></i> Mis Reportes Recientes
                     </h5>
-                    <a href="{% url 'reportes:mis_reportes' %}" class="btn btn-light btn-sm">
-                        Ver Todos
-                    </a>
                 </div>
                 <div class="card-body">
                     {% if mis_reportes %}
@@ -148,9 +145,6 @@
                         <a href="{% url 'reportes:crear_reporte' %}" class="btn btn-primary">
                             <i class="bi bi-plus-circle"></i> Crear Reporte
                         </a>
-                        <a href="{% url 'reportes:mis_reportes' %}" class="btn btn-outline-primary">
-                            <i class="bi bi-list-ul"></i> Ver Mis Reportes
-                        </a>
                         <a href="{% url 'reportes:mapa' %}" class="btn btn-outline-success">
                             <i class="bi bi-map"></i> Ver Mapa
                         </a>
@@ -178,31 +172,3 @@
     </div>
 </div>
 {% endblock %}
-
-{% for reporte in mis_reportes %}
-<a href="{% url 'reportes:detalle_reporte' reporte.pk %}" 
-   class="list-group-item list-group-item-action reporte-item">
-    <div class="d-flex w-100 justify-content-between align-items-start">
-        <div class="flex-grow-1">
-            <div class="d-flex align-items-center mb-2">
-                <h6 class="mb-0 me-2">{{ reporte.titulo }}</h6>
-                <span class="badge badge-prioridad-{{ reporte.prioridad.nombre|lower }}">
-                    {{ reporte.prioridad.nombre }}
-                </span>
-            </div>
-            <p class="mb-1 small text-muted">
-                <i class="bi bi-geo-alt"></i> {{ reporte.direccion|truncatewords:15 }}
-            </p>
-            <p class="mb-0 small">
-                <span class="badge badge-estado-{{ reporte.estado.nombre|lower|cut:' ' }}">
-                    {{ reporte.estado.nombre }}
-                </span>
-                <span class="text-muted ms-2">
-                    <i class="bi bi-calendar"></i> {{ reporte.reportado_en|date:"d/m/Y" }}
-                </span>
-            </p>
-        </div>
-        <i class="bi bi-chevron-right text-muted"></i>
-    </div>
-</a>
-{% endfor %}

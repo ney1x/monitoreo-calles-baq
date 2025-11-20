@@ -7,8 +7,8 @@
 <div class="container-fluid">
     <!-- Botón volver -->
     <div class="mb-3">
-        <a href="{% url 'reportes:mis_reportes' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Volver a Mis Reportes
+        <a href="{% url 'usuarios:ciudadano_home' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Inicio
         </a>
     </div>
 
@@ -184,13 +184,6 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        {% if reporte.usuario == request.user %}
-                        <a href="{% url 'reportes:agregar_evidencia' reporte.pk %}" 
-                           class="btn btn-primary">
-                            <i class="bi bi-camera"></i> Agregar Evidencia
-                        </a>
-                        {% endif %}
-                        
                         {% if reporte.latitud and reporte.longitud %}
                         <a href="https://www.google.com/maps?q={{ reporte.latitud }},{{ reporte.longitud }}" 
                            target="_blank" 
@@ -198,11 +191,6 @@
                             <i class="bi bi-map"></i> Ver en Google Maps
                         </a>
                         {% endif %}
-                        
-                        <a href="{% url 'reportes:mis_reportes' %}" 
-                           class="btn btn-outline-secondary">
-                            <i class="bi bi-list-ul"></i> Ver Todos Mis Reportes
-                        </a>
                     </div>
                 </div>
             </div>

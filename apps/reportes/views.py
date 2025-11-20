@@ -89,13 +89,6 @@ def reporte_exitoso(request, pk):
     })
 
 
-@login_required
-def mis_reportes(request):
-    """Vista para ver los reportes del usuario actual"""
-    reportes = Reporte.objects.filter(usuario=request.user).order_by('-reportado_en')
-    return render(request, 'reportes/mis_reportes.html', {
-        'reportes': reportes
-    })
 
 
 @login_required
