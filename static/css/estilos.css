@@ -1,0 +1,449 @@
+/* ============================================
+   VARIABLES Y ESTILOS GENERALES
+   ============================================ */
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* ============================================
+   NAVBAR
+   ============================================ */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+/* ============================================
+   CARDS Y CONTENEDORES
+   ============================================ */
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+}
+
+/* ============================================
+   BADGES DE ESTADO
+   ============================================ */
+.badge-estado-nuevo {
+    background-color: #0dcaf0;
+    color: white;
+}
+
+.badge-estado-enrevision,
+.badge-estado-revision {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.badge-estado-asignado {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.badge-estado-enproceso,
+.badge-estado-proceso {
+    background-color: #fd7e14;
+    color: #000;
+}
+
+.badge-estado-resuelto {
+    background-color: #198754;
+    color: white;
+}
+
+.badge-estado-rechazado {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* ============================================
+   BADGES DE PRIORIDAD
+   ============================================ */
+.badge-prioridad-baja {
+    background-color: #6c757d !important;
+    color: white !important;
+    font-weight: 700 !important;
+    padding: 8px 14px !important;
+    font-size: 0.9rem !important;
+}
+
+.badge-prioridad-media {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+    font-weight: 700 !important;
+    padding: 8px 14px !important;
+    font-size: 0.9rem !important;
+}
+
+.badge-prioridad-alta {
+    background-color: #fd7e14 !important;
+    color: white !important;
+    font-weight: 700 !important;
+    padding: 8px 14px !important;
+    font-size: 0.9rem !important;
+}
+
+.badge-prioridad-critica,
+.badge-prioridad-crítica {
+    background-color: #dc3545 !important;
+    color: white !important;
+    font-weight: 700 !important;
+    padding: 8px 14px !important;
+    font-size: 0.9rem !important;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* ============================================
+   FORMULARIOS
+   ============================================ */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+}
+
+/* ============================================
+   BOTONES
+   ============================================ */
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #157347;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+}
+
+/* ============================================
+   MAPA
+   ============================================ */
+#map {
+    height: 600px;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 8px;
+}
+
+/* ============================================
+   LISTA DE REPORTES
+   ============================================ */
+.reporte-item {
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s;
+}
+
+.reporte-item:hover {
+    border-left-color: var(--success-color);
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.reporte-item.prioridad-critica {
+    border-left-color: var(--danger-color);
+}
+
+.reporte-item.prioridad-alta {
+    border-left-color: var(--warning-color);
+}
+
+/* ============================================
+   DASHBOARD
+   ============================================ */
+.stat-card {
+    border-left: 4px solid var(--primary-color);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.stat-card .icon {
+    font-size: 3rem;
+    opacity: 0.3;
+}
+
+.stat-card .number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* ============================================
+   UPLOAD DE ARCHIVOS
+   ============================================ */
+.file-upload-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.file-upload-wrapper input[type=file] {
+    position: absolute;
+    left: -9999px;
+}
+
+.file-upload-label {
+    display: block;
+    padding: 0.5rem 1rem;
+    background-color: var(--light-color);
+    border: 2px dashed var(--secondary-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.file-upload-label:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.preview-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.preview-item {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preview-item img,
+.preview-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-item .remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* ============================================
+   GEOLOCALIZACIÓN
+   ============================================ */
+.location-status {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.location-status.loading {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.location-status.success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.location-status.error {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+/* ============================================
+   HISTORIAL
+   ============================================ */
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 30px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--primary-color);
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 60px;
+    margin-bottom: 30px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 22px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px var(--primary-color);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1rem;
+    }
+    
+    #map {
+        height: 400px;
+    }
+    
+    .stat-card .number {
+        font-size: 1.8rem;
+    }
+    
+    .preview-item {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* ============================================
+   LOADING SPINNER
+   ============================================ */
+.spinner-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+/* ============================================
+   NOTIFICACIONES
+   ============================================ */
+.notification-item {
+    transition: background-color 0.3s;
+}
+
+.notification-item:hover {
+    background-color: var(--light-color);
+}
+
+.notification-item.unread {
+    background-color: rgba(13, 110, 253, 0.1);
+    font-weight: 600;
+}
+
+.notification-item.unread::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    margin-right: 10px;
+}

@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Subir Evidencia - Reporte #{{ reporte.id }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Botón volver -->
+    <div class="mb-3">
+        <a href="{% url 'reportes:cambiar_estado_reporte' reporte.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Reporte
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Info del Reporte -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Reporte #{{ reporte.id }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h4>{{ reporte.titulo }}</h4>
+                    <p class="text-muted">{{ reporte.descripcion|truncatewords:20 }}</p>
+                    
+                    <hr>
+                    
+                    <div class="mb-2">
+                        <strong>Tipo:</strong> {{ reporte.get_tipo_display }}
+                    </div>
+                    
+                    <div class="mb-2">
+                        <strong>Ubicación:</strong><br>
+                        <i class="bi bi-geo-alt"></i> {{ reporte.direccion }}
+                    </div>
+                    
+                    <div class="mb-0">
+                        <strong>Estado:</strong> 
+                        <span class="badge badge-estado-{{ reporte.estado.nombre|lower|cut:' ' }}">
+                            {{ reporte.estado.nombre }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evidencias Existentes -->
+            {% if reporte.evidencias.exists %}
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-images"></i> Evidencias Actuales ({{ reporte.evidencias.count }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        {% for evidencia in reporte.evidencias.all %}
+                        <div class="col-6">
+                            {% if evidencia.tipo_evidencia == 'foto' %}
+                            <a href="{{ evidencia.archivo.url }}" target="_blank">
+                                <img src="{{ evidencia.archivo.url }}" 
+                                     class="img-thumbnail w-100" 
+                                     alt="Evidencia"
+                                     style="height: 100px; object-fit: cover;">
+                            </a>
+                            {% else %}
+                            <a href="{{ evidencia.archivo.url }}" target="_blank" class="btn btn-sm btn-primary w-100">
+                                <i class="bi bi-file-earmark"></i> {{ evidencia.tipo_evidencia }}
+                            </a>
+                            {% endif %}
+                            <small class="text-muted d-block mt-1">
+                                {{ evidencia.fechaSubida|date:"d/m/Y" }}
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Formulario para Subir Evidencia -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-camera-fill"></i> Subir Evidencia de Reparación
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Importante:</strong> Sube fotos o videos del trabajo realizado. 
+                        Esto servirá como evidencia de la reparación y será visible para el ciudadano y las autoridades.
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="archivo" class="form-label">
+                                Seleccionar Archivo *
+                            </label>
+                            <input type="file" 
+                                   class="form-control" 
+                                   id="archivo" 
+                                   name="archivo" 
+                                   accept="image/*,video/*"
+                                   required>
+                            <div class="form-text">
+                                Formatos permitidos: JPG, PNG, MP4, AVI (máx. 10MB)
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="notas" class="form-label">Descripción del Trabajo Realizado</label>
+                            <textarea class="form-control" 
+                                      id="notas" 
+                                      name="notas" 
+                                      rows="5" 
+                                      placeholder="Describe el trabajo realizado:&#10;- Materiales utilizados&#10;- Tiempo empleado&#10;- Estado final&#10;- Observaciones"></textarea>
+                            <div class="form-text">
+                                Proporciona detalles sobre el trabajo de reparación
+                            </div>
+                        </div>
+
+                        <!-- Preview de imagen (opcional con JavaScript) -->
+                        <div class="mb-3" id="preview-container" style="display: none;">
+                            <label class="form-label">Vista Previa:</label>
+                            <img id="preview-image" class="img-thumbnail" style="max-height: 200px;">
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-upload"></i> Subir Evidencia
+                            </button>
+                            <a href="{% url 'reportes:cambiar_estado_reporte' reporte.pk %}" 
+                               class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Consejos -->
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-header bg-warning">
+                    <h6 class="mb-0">
+                        <i class="bi bi-lightbulb"></i> Consejos para una buena evidencia
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0 small">
+                        <li>Toma fotos antes y después de la reparación</li>
+                        <li>Asegúrate de que las imágenes sean claras y bien iluminadas</li>
+                        <li>Incluye diferentes ángulos del área reparada</li>
+                        <li>Documenta los materiales utilizados</li>
+                        <li>Si es posible, incluye una referencia de escala</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Preview de imagen al seleccionar archivo
+document.getElementById('archivo').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('preview-image').src = e.target.result;
+            document.getElementById('preview-container').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        document.getElementById('preview-container').style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

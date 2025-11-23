@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil - Monitoreo Calles BAQ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Botón volver -->
+    <div class="mb-3">
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Información del Usuario -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-person-circle text-primary" style="font-size: 6rem;"></i>
+                    </div>
+                    <h4>{{ user.get_full_name|default:user.username }}</h4>
+                    <p class="text-muted">@{{ user.username }}</p>
+                    
+                    {% if user.rol %}
+                    <span class="badge bg-primary mb-3">{{ user.rol.nombre }}</span>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="text-start">
+                        <p class="mb-2">
+                            <i class="bi bi-envelope"></i> 
+                            <strong>Email:</strong><br>
+                            <small>{{ user.email }}</small>
+                        </p>
+                        
+                        {% if user.telefono %}
+                        <p class="mb-2">
+                            <i class="bi bi-telephone"></i> 
+                            <strong>Teléfono:</strong><br>
+                            <small>{{ user.telefono }}</small>
+                        </p>
+                        {% endif %}
+                        
+                        <p class="mb-2">
+                            <i class="bi bi-calendar"></i> 
+                            <strong>Miembro desde:</strong><br>
+                            <small>{{ user.creadoEn|date:"d/m/Y" }}</small>
+                        </p>
+                        
+                        {% if user.ultimoInicioSesion %}
+                        <p class="mb-0">
+                            <i class="bi bi-clock"></i> 
+                            <strong>Último acceso:</strong><br>
+                            <small>{{ user.ultimoInicioSesion|date:"d/m/Y H:i" }}</small>
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editar Perfil -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> Editar Información
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'usuarios:actualizar_perfil' %}">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="first_name" 
+                                       name="first_name" value="{{ user.first_name }}">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Apellido</label>
+                                <input type="text" class="form-control" id="last_name" 
+                                       name="last_name" value="{{ user.last_name }}">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" 
+                                   name="email" value="{{ user.email }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="telefono" class="form-label">Teléfono</label>
+                            <input type="text" class="form-control" id="telefono" 
+                                   name="telefono" value="{{ user.telefono|default:'' }}" 
+                                   placeholder="3001234567">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Guardar Cambios
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Cambiar Contraseña -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-lock"></i> Cambiar Contraseña
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'usuarios:cambiar_password' %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="old_password" class="form-label">Contraseña Actual</label>
+                            <input type="password" class="form-control" id="old_password" 
+                                   name="old_password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="new_password1" class="form-label">Nueva Contraseña</label>
+                            <input type="password" class="form-control" id="new_password1" 
+                                   name="new_password1" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="new_password2" class="form-label">Confirmar Nueva Contraseña</label>
+                            <input type="password" class="form-control" id="new_password2" 
+                                   name="new_password2" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-key"></i> Cambiar Contraseña
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas del Usuario -->
+    {% if user.rol.nombre == 'Ciudadano' %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up"></i> Mis Estadísticas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h3 class="text-primary">{{ estadisticas.total }}</h3>
+                            <p class="text-muted">Reportes Totales</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-info">{{ estadisticas.nuevos }}</h3>
+                            <p class="text-muted">En Espera</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-warning">{{ estadisticas.en_proceso }}</h3>
+                            <p class="text-muted">En Proceso</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-success">{{ estadisticas.resueltos }}</h3>
+                            <p class="text-muted">Resueltos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

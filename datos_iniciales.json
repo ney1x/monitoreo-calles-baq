@@ -1,0 +1,1138 @@
+[
+{
+  "model": "auth.permission",
+  "pk": 1,
+  "fields": {
+    "name": "Can add log entry",
+    "content_type": 1,
+    "codename": "add_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 2,
+  "fields": {
+    "name": "Can change log entry",
+    "content_type": 1,
+    "codename": "change_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 3,
+  "fields": {
+    "name": "Can delete log entry",
+    "content_type": 1,
+    "codename": "delete_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 4,
+  "fields": {
+    "name": "Can view log entry",
+    "content_type": 1,
+    "codename": "view_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 5,
+  "fields": {
+    "name": "Can add permission",
+    "content_type": 2,
+    "codename": "add_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 6,
+  "fields": {
+    "name": "Can change permission",
+    "content_type": 2,
+    "codename": "change_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 7,
+  "fields": {
+    "name": "Can delete permission",
+    "content_type": 2,
+    "codename": "delete_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 8,
+  "fields": {
+    "name": "Can view permission",
+    "content_type": 2,
+    "codename": "view_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 9,
+  "fields": {
+    "name": "Can add group",
+    "content_type": 3,
+    "codename": "add_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 10,
+  "fields": {
+    "name": "Can change group",
+    "content_type": 3,
+    "codename": "change_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 11,
+  "fields": {
+    "name": "Can delete group",
+    "content_type": 3,
+    "codename": "delete_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 12,
+  "fields": {
+    "name": "Can view group",
+    "content_type": 3,
+    "codename": "view_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 13,
+  "fields": {
+    "name": "Can add content type",
+    "content_type": 4,
+    "codename": "add_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 14,
+  "fields": {
+    "name": "Can change content type",
+    "content_type": 4,
+    "codename": "change_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 15,
+  "fields": {
+    "name": "Can delete content type",
+    "content_type": 4,
+    "codename": "delete_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 16,
+  "fields": {
+    "name": "Can view content type",
+    "content_type": 4,
+    "codename": "view_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 17,
+  "fields": {
+    "name": "Can add session",
+    "content_type": 5,
+    "codename": "add_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 18,
+  "fields": {
+    "name": "Can change session",
+    "content_type": 5,
+    "codename": "change_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 19,
+  "fields": {
+    "name": "Can delete session",
+    "content_type": 5,
+    "codename": "delete_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 20,
+  "fields": {
+    "name": "Can view session",
+    "content_type": 5,
+    "codename": "view_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 21,
+  "fields": {
+    "name": "Can add Rol",
+    "content_type": 6,
+    "codename": "add_rol"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 22,
+  "fields": {
+    "name": "Can change Rol",
+    "content_type": 6,
+    "codename": "change_rol"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 23,
+  "fields": {
+    "name": "Can delete Rol",
+    "content_type": 6,
+    "codename": "delete_rol"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 24,
+  "fields": {
+    "name": "Can view Rol",
+    "content_type": 6,
+    "codename": "view_rol"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 25,
+  "fields": {
+    "name": "Can add Usuario",
+    "content_type": 7,
+    "codename": "add_usuario"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 26,
+  "fields": {
+    "name": "Can change Usuario",
+    "content_type": 7,
+    "codename": "change_usuario"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 27,
+  "fields": {
+    "name": "Can delete Usuario",
+    "content_type": 7,
+    "codename": "delete_usuario"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 28,
+  "fields": {
+    "name": "Can view Usuario",
+    "content_type": 7,
+    "codename": "view_usuario"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 29,
+  "fields": {
+    "name": "Can add Asignaci�n",
+    "content_type": 8,
+    "codename": "add_asignacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 30,
+  "fields": {
+    "name": "Can change Asignaci�n",
+    "content_type": 8,
+    "codename": "change_asignacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 31,
+  "fields": {
+    "name": "Can delete Asignaci�n",
+    "content_type": 8,
+    "codename": "delete_asignacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 32,
+  "fields": {
+    "name": "Can view Asignaci�n",
+    "content_type": 8,
+    "codename": "view_asignacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 33,
+  "fields": {
+    "name": "Can add Estado de Reporte",
+    "content_type": 9,
+    "codename": "add_estadoreporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 34,
+  "fields": {
+    "name": "Can change Estado de Reporte",
+    "content_type": 9,
+    "codename": "change_estadoreporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 35,
+  "fields": {
+    "name": "Can delete Estado de Reporte",
+    "content_type": 9,
+    "codename": "delete_estadoreporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 36,
+  "fields": {
+    "name": "Can view Estado de Reporte",
+    "content_type": 9,
+    "codename": "view_estadoreporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 37,
+  "fields": {
+    "name": "Can add Evidencia",
+    "content_type": 10,
+    "codename": "add_evidencia"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 38,
+  "fields": {
+    "name": "Can change Evidencia",
+    "content_type": 10,
+    "codename": "change_evidencia"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 39,
+  "fields": {
+    "name": "Can delete Evidencia",
+    "content_type": 10,
+    "codename": "delete_evidencia"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 40,
+  "fields": {
+    "name": "Can view Evidencia",
+    "content_type": 10,
+    "codename": "view_evidencia"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 41,
+  "fields": {
+    "name": "Can add Grupo Duplicado",
+    "content_type": 11,
+    "codename": "add_grupoduplicado"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 42,
+  "fields": {
+    "name": "Can change Grupo Duplicado",
+    "content_type": 11,
+    "codename": "change_grupoduplicado"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 43,
+  "fields": {
+    "name": "Can delete Grupo Duplicado",
+    "content_type": 11,
+    "codename": "delete_grupoduplicado"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 44,
+  "fields": {
+    "name": "Can view Grupo Duplicado",
+    "content_type": 11,
+    "codename": "view_grupoduplicado"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 45,
+  "fields": {
+    "name": "Can add Historial de Reporte",
+    "content_type": 12,
+    "codename": "add_historialreporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 46,
+  "fields": {
+    "name": "Can change Historial de Reporte",
+    "content_type": 12,
+    "codename": "change_historialreporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 47,
+  "fields": {
+    "name": "Can delete Historial de Reporte",
+    "content_type": 12,
+    "codename": "delete_historialreporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 48,
+  "fields": {
+    "name": "Can view Historial de Reporte",
+    "content_type": 12,
+    "codename": "view_historialreporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 49,
+  "fields": {
+    "name": "Can add Notificaci�n",
+    "content_type": 13,
+    "codename": "add_notificacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 50,
+  "fields": {
+    "name": "Can change Notificaci�n",
+    "content_type": 13,
+    "codename": "change_notificacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 51,
+  "fields": {
+    "name": "Can delete Notificaci�n",
+    "content_type": 13,
+    "codename": "delete_notificacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 52,
+  "fields": {
+    "name": "Can view Notificaci�n",
+    "content_type": 13,
+    "codename": "view_notificacion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 53,
+  "fields": {
+    "name": "Can add Prioridad de Reporte",
+    "content_type": 14,
+    "codename": "add_prioridadreporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 54,
+  "fields": {
+    "name": "Can change Prioridad de Reporte",
+    "content_type": 14,
+    "codename": "change_prioridadreporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 55,
+  "fields": {
+    "name": "Can delete Prioridad de Reporte",
+    "content_type": 14,
+    "codename": "delete_prioridadreporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 56,
+  "fields": {
+    "name": "Can view Prioridad de Reporte",
+    "content_type": 14,
+    "codename": "view_prioridadreporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 57,
+  "fields": {
+    "name": "Can add Registro de Auditor�a",
+    "content_type": 15,
+    "codename": "add_registroauditoria"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 58,
+  "fields": {
+    "name": "Can change Registro de Auditor�a",
+    "content_type": 15,
+    "codename": "change_registroauditoria"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 59,
+  "fields": {
+    "name": "Can delete Registro de Auditor�a",
+    "content_type": 15,
+    "codename": "delete_registroauditoria"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 60,
+  "fields": {
+    "name": "Can view Registro de Auditor�a",
+    "content_type": 15,
+    "codename": "view_registroauditoria"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 61,
+  "fields": {
+    "name": "Can add Reporte",
+    "content_type": 16,
+    "codename": "add_reporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 62,
+  "fields": {
+    "name": "Can change Reporte",
+    "content_type": 16,
+    "codename": "change_reporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 63,
+  "fields": {
+    "name": "Can delete Reporte",
+    "content_type": 16,
+    "codename": "delete_reporte"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 64,
+  "fields": {
+    "name": "Can view Reporte",
+    "content_type": 16,
+    "codename": "view_reporte"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 1,
+  "fields": {
+    "app_label": "admin",
+    "model": "logentry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 2,
+  "fields": {
+    "app_label": "auth",
+    "model": "permission"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 3,
+  "fields": {
+    "app_label": "auth",
+    "model": "group"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 4,
+  "fields": {
+    "app_label": "contenttypes",
+    "model": "contenttype"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 5,
+  "fields": {
+    "app_label": "sessions",
+    "model": "session"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 6,
+  "fields": {
+    "app_label": "usuarios",
+    "model": "rol"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 7,
+  "fields": {
+    "app_label": "usuarios",
+    "model": "usuario"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 8,
+  "fields": {
+    "app_label": "reportes",
+    "model": "asignacion"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 9,
+  "fields": {
+    "app_label": "reportes",
+    "model": "estadoreporte"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 10,
+  "fields": {
+    "app_label": "reportes",
+    "model": "evidencia"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 11,
+  "fields": {
+    "app_label": "reportes",
+    "model": "grupoduplicado"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 12,
+  "fields": {
+    "app_label": "reportes",
+    "model": "historialreporte"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 13,
+  "fields": {
+    "app_label": "reportes",
+    "model": "notificacion"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 14,
+  "fields": {
+    "app_label": "reportes",
+    "model": "prioridadreporte"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 15,
+  "fields": {
+    "app_label": "reportes",
+    "model": "registroauditoria"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 16,
+  "fields": {
+    "app_label": "reportes",
+    "model": "reporte"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "lagn113yhu2awc86s9nbq3lpp7xd4d4m",
+  "fields": {
+    "session_data": ".eJxVjDsOwjAQBe_iGlnE6y8lfc5grXcdHEC2FCcV4u4QKQW0b2beS0Tc1hK3npc4s7iIQZx-t4T0yHUHfMd6a5JaXZc5yV2RB-1ybJyf18P9OyjYy7f2wAoRQvbOZrCBAoSE2ijjadIE4AwqfabMISntFNrBGpgMcrIYgMT7A9YnN60:1vIe0f:u3f_cs2gVQPmgypc2-XfeFanqfs24O5WFE2jezlCbUY",
+    "expire_date": "2025-11-25T02:21:29.076Z"
+  }
+},
+{
+  "model": "usuarios.rol",
+  "pk": 1,
+  "fields": {
+    "nombre": "Ciudadano",
+    "descripcion": "Usuario ciudadano que reporta incidencias"
+  }
+},
+{
+  "model": "usuarios.rol",
+  "pk": 2,
+  "fields": {
+    "nombre": "T�cnico",
+    "descripcion": "T�cnico de mantenimiento vial"
+  }
+},
+{
+  "model": "usuarios.rol",
+  "pk": 3,
+  "fields": {
+    "nombre": "Autoridad",
+    "descripcion": "Autoridad municipal supervisora"
+  }
+},
+{
+  "model": "usuarios.rol",
+  "pk": 4,
+  "fields": {
+    "nombre": "Administrador",
+    "descripcion": "Administrador del sistema"
+  }
+},
+{
+  "model": "usuarios.usuario",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$AxVzynB7ICNETaKcs3GLKR$fWSRNk5cGOlqWwtMUiGhNtFcljg+L3tRj9p6Jh26Qr8=",
+    "last_login": "2025-11-11T03:47:00.334Z",
+    "is_superuser": true,
+    "username": "admin1",
+    "first_name": "",
+    "last_name": "",
+    "email": "admin1@superuser.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-11-10T21:23:29.991Z",
+    "telefono": null,
+    "rol": null,
+    "activo": true,
+    "creadoEn": "2025-11-10T21:23:30.353Z",
+    "ultimoInicioSesion": "2025-11-11T03:47:00.338Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "usuarios.usuario",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$y7UCTQhU037kBHCgMOirTI$0H8SnMvBpuxll2E8w3te1VawIZn4713RG5CwmpqkkmM=",
+    "last_login": "2025-11-11T03:46:24.115Z",
+    "is_superuser": false,
+    "username": "ciudadano1",
+    "first_name": "",
+    "last_name": "",
+    "email": "ciudadano@test.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2025-11-10T21:43:35.897Z",
+    "telefono": "3001234567",
+    "rol": 1,
+    "activo": true,
+    "creadoEn": "2025-11-10T21:43:36.248Z",
+    "ultimoInicioSesion": "2025-11-11T03:46:24.119Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "usuarios.usuario",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$XusQWeOkWvb6lqjWo5ZWwQ$6IHncqxDEy+dUOqHJysDOjWzU2alxvbU2H/fkqpyzts=",
+    "last_login": "2025-11-11T03:46:36.345Z",
+    "is_superuser": false,
+    "username": "tecnico1",
+    "first_name": "",
+    "last_name": "",
+    "email": "tecnico@test.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2025-11-10T21:43:36.254Z",
+    "telefono": "3002345678",
+    "rol": 2,
+    "activo": true,
+    "creadoEn": "2025-11-10T21:43:36.598Z",
+    "ultimoInicioSesion": "2025-11-11T03:46:36.350Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "usuarios.usuario",
+  "pk": 4,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$5bpSX3VQeORpxPXhjkoCrf$YeViZHpSCnkcErO6GdXawaseO2QuTkztJE72vrnUMzQ=",
+    "last_login": "2025-11-11T03:46:45.042Z",
+    "is_superuser": false,
+    "username": "autoridad1",
+    "first_name": "",
+    "last_name": "",
+    "email": "autoridad@test.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2025-11-10T21:43:36.604Z",
+    "telefono": "3003456789",
+    "rol": 3,
+    "activo": true,
+    "creadoEn": "2025-11-10T21:43:36.946Z",
+    "ultimoInicioSesion": "2025-11-11T03:46:45.047Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "usuarios.usuario",
+  "pk": 5,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$QKnur7J9S9buhipkGu51fH$peTTpwW+x3SbRA3UWmAeFa8nQBSRqxY/2O73TX/aQU8=",
+    "last_login": "2025-11-11T01:08:02.047Z",
+    "is_superuser": false,
+    "username": "testuser1",
+    "first_name": "Juan",
+    "last_name": "P�rez",
+    "email": "test@example.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2025-11-10T22:51:39.669Z",
+    "telefono": "+57 300 123 4567",
+    "rol": 1,
+    "activo": true,
+    "creadoEn": "2025-11-10T22:51:40.088Z",
+    "ultimoInicioSesion": "2025-11-11T01:08:02.053Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "reportes.prioridadreporte",
+  "pk": 1,
+  "fields": {
+    "nombre": "Baja",
+    "nivel_gravedad": 1
+  }
+},
+{
+  "model": "reportes.prioridadreporte",
+  "pk": 2,
+  "fields": {
+    "nombre": "Media",
+    "nivel_gravedad": 2
+  }
+},
+{
+  "model": "reportes.prioridadreporte",
+  "pk": 3,
+  "fields": {
+    "nombre": "Alta",
+    "nivel_gravedad": 3
+  }
+},
+{
+  "model": "reportes.prioridadreporte",
+  "pk": 4,
+  "fields": {
+    "nombre": "Cr�tica",
+    "nivel_gravedad": 4
+  }
+},
+{
+  "model": "reportes.estadoreporte",
+  "pk": 1,
+  "fields": {
+    "nombre": "Nuevo",
+    "descripcion": "Reporte reci�n creado, pendiente de revisi�n"
+  }
+},
+{
+  "model": "reportes.estadoreporte",
+  "pk": 2,
+  "fields": {
+    "nombre": "En Revisi�n",
+    "descripcion": "Reporte siendo revisado por autoridades"
+  }
+},
+{
+  "model": "reportes.estadoreporte",
+  "pk": 3,
+  "fields": {
+    "nombre": "Asignado",
+    "descripcion": "Reporte asignado a un t�cnico"
+  }
+},
+{
+  "model": "reportes.estadoreporte",
+  "pk": 4,
+  "fields": {
+    "nombre": "En Proceso",
+    "descripcion": "T�cnico trabajando en la reparaci�n"
+  }
+},
+{
+  "model": "reportes.estadoreporte",
+  "pk": 5,
+  "fields": {
+    "nombre": "Resuelto",
+    "descripcion": "Problema solucionado"
+  }
+},
+{
+  "model": "reportes.estadoreporte",
+  "pk": 6,
+  "fields": {
+    "nombre": "Rechazado",
+    "descripcion": "Reporte rechazado o inv�lido"
+  }
+},
+{
+  "model": "reportes.reporte",
+  "pk": 1,
+  "fields": {
+    "usuario": 2,
+    "prioridad": 3,
+    "estado": 1,
+    "grupoDuplicado": null,
+    "titulo": "Bache en Calle 72",
+    "tipo": "bache",
+    "descripcion": "Bache de gran tama�o que afecta el tr�fico vehicular",
+    "latitud": "10.9878000",
+    "longitud": "-74.7889000",
+    "direccion": "Calle 72 #43-85, Barranquilla",
+    "duplicado": false,
+    "reportado_en": "2025-11-10T21:43:36.954Z",
+    "actualizado_en": "2025-11-10T21:43:36.954Z"
+  }
+},
+{
+  "model": "reportes.reporte",
+  "pk": 2,
+  "fields": {
+    "usuario": 5,
+    "prioridad": 2,
+    "estado": 1,
+    "grupoDuplicado": null,
+    "titulo": "Hueco en medio de la calle",
+    "tipo": "bache",
+    "descripcion": "Hueco de profundidad alarmante",
+    "latitud": null,
+    "longitud": null,
+    "direccion": "Calle 69#69-69",
+    "duplicado": false,
+    "reportado_en": "2025-11-10T23:04:26.106Z",
+    "actualizado_en": "2025-11-10T23:04:26.106Z"
+  }
+},
+{
+  "model": "reportes.reporte",
+  "pk": 3,
+  "fields": {
+    "usuario": 5,
+    "prioridad": 2,
+    "estado": 1,
+    "grupoDuplicado": null,
+    "titulo": "grieta",
+    "tipo": "fisura",
+    "descripcion": "grieta leve",
+    "latitud": null,
+    "longitud": null,
+    "direccion": "Cra 51ba",
+    "duplicado": false,
+    "reportado_en": "2025-11-10T23:07:59.963Z",
+    "actualizado_en": "2025-11-10T23:07:59.963Z"
+  }
+},
+{
+  "model": "reportes.reporte",
+  "pk": 4,
+  "fields": {
+    "usuario": 5,
+    "prioridad": 2,
+    "estado": 1,
+    "grupoDuplicado": null,
+    "titulo": "Bache profundo via principal",
+    "tipo": "hundimiento",
+    "descripcion": "bache",
+    "latitud": null,
+    "longitud": null,
+    "direccion": "Cra 1 # 12-12",
+    "duplicado": false,
+    "reportado_en": "2025-11-10T23:38:26.498Z",
+    "actualizado_en": "2025-11-10T23:38:26.498Z"
+  }
+},
+{
+  "model": "reportes.reporte",
+  "pk": 5,
+  "fields": {
+    "usuario": 2,
+    "prioridad": 2,
+    "estado": 3,
+    "grupoDuplicado": null,
+    "titulo": "Bache via principal",
+    "tipo": "bache",
+    "descripcion": "Bache",
+    "latitud": null,
+    "longitud": null,
+    "direccion": "Carrera 31 #31",
+    "duplicado": false,
+    "reportado_en": "2025-11-11T00:48:39.380Z",
+    "actualizado_en": "2025-11-11T02:20:14.459Z"
+  }
+},
+{
+  "model": "reportes.evidencia",
+  "pk": 1,
+  "fields": {
+    "reporte": 4,
+    "tipo_evidencia": "foto",
+    "archivo": "evidencias/2025/11/10/Diagrama_en_blanco_6.png",
+    "url_almacenamiento": "",
+    "nombre_archivo": "Diagrama en blanco (6).png",
+    "tamano_bytes": 43919,
+    "fechaSubida": "2025-11-10T23:38:26.507Z"
+  }
+},
+{
+  "model": "reportes.asignacion",
+  "pk": 1,
+  "fields": {
+    "reporte": 5,
+    "tecnico": 3,
+    "asignado_por": 4,
+    "fecha_asignacion": "2025-11-11T02:20:14.454Z",
+    "notas": "11/11/2025"
+  }
+},
+{
+  "model": "reportes.historialreporte",
+  "pk": 1,
+  "fields": {
+    "reporte": 1,
+    "usuario": 2,
+    "accion": "Reporte creado",
+    "detalles": "Reporte 'Bache en Calle 72' creado en Calle 72 #43-85, Barranquilla",
+    "fecha_accion": "2025-11-10T21:43:36.957Z"
+  }
+},
+{
+  "model": "reportes.historialreporte",
+  "pk": 2,
+  "fields": {
+    "reporte": 2,
+    "usuario": 5,
+    "accion": "Reporte creado",
+    "detalles": "Reporte 'Hueco en medio de la calle' creado en Calle 69#69-69",
+    "fecha_accion": "2025-11-10T23:04:26.111Z"
+  }
+},
+{
+  "model": "reportes.historialreporte",
+  "pk": 3,
+  "fields": {
+    "reporte": 3,
+    "usuario": 5,
+    "accion": "Reporte creado",
+    "detalles": "Reporte 'grieta' creado en Cra 51ba",
+    "fecha_accion": "2025-11-10T23:07:59.966Z"
+  }
+},
+{
+  "model": "reportes.historialreporte",
+  "pk": 4,
+  "fields": {
+    "reporte": 4,
+    "usuario": 5,
+    "accion": "Reporte creado",
+    "detalles": "Reporte 'Bache profundo via principal' creado en Cra 1 # 12-12",
+    "fecha_accion": "2025-11-10T23:38:26.501Z"
+  }
+},
+{
+  "model": "reportes.historialreporte",
+  "pk": 5,
+  "fields": {
+    "reporte": 5,
+    "usuario": 2,
+    "accion": "Reporte creado",
+    "detalles": "Reporte 'Bache via principal' creado en Carrera 31 #31",
+    "fecha_accion": "2025-11-11T00:48:39.383Z"
+  }
+},
+{
+  "model": "reportes.historialreporte",
+  "pk": 6,
+  "fields": {
+    "reporte": 5,
+    "usuario": 4,
+    "accion": "Reporte asignado",
+    "detalles": "Asignado a t�cnico: tecnico1",
+    "fecha_accion": "2025-11-11T02:20:14.464Z"
+  }
+},
+{
+  "model": "reportes.notificacion",
+  "pk": 1,
+  "fields": {
+    "usuario": 3,
+    "reporte": 5,
+    "canal": "app",
+    "mensaje": "Se te ha asignado el reporte: Bache via principal en Carrera 31 #31",
+    "leido": false,
+    "enviado_en": "2025-11-11T02:20:14.466Z"
+  }
+}
+]

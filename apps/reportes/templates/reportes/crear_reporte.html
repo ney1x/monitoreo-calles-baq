@@ -1,0 +1,138 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Crear Reporte{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Botón volver -->
+            <div class="mb-3">
+                <a href="{% url 'usuarios:ciudadano_home' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver al Inicio
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-plus-circle"></i> Crear Nuevo Reporte
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="formReporte">
+                        {% csrf_token %}
+                        
+                        <!-- Tipo de falla -->
+                        <div class="mb-3">
+                            <label for="{{ form.tipo.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-exclamation-triangle"></i> Tipo de falla *
+                            </label>
+                            {{ form.tipo }}
+                            {% if form.tipo.errors %}
+                                <div class="text-danger">{{ form.tipo.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Título -->
+                        <div class="mb-3">
+                            <label for="{{ form.titulo.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-card-heading"></i> Título del reporte *
+                            </label>
+                            {{ form.titulo }}
+                            {% if form.titulo.errors %}
+                                <div class="text-danger">{{ form.titulo.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="mb-3">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-card-text"></i> Descripción *
+                            </label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <div class="text-danger">{{ form.descripcion.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Dirección -->
+                        <div class="mb-3">
+                            <label for="{{ form.direccion.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-geo-alt"></i> Dirección *
+                            </label>
+                            {{ form.direccion }}
+                            {% if form.direccion.errors %}
+                                <div class="text-danger">{{ form.direccion.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                Ejemplo: Calle 72 #43-85, Barranquilla
+                            </div>
+                        </div>
+
+                        <!-- Coordenadas GPS (ocultas) -->
+                        {{ form.latitud }}
+                        {{ form.longitud }}
+
+                        <!-- Botón para obtener ubicación GPS -->
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-info" id="btnObtenerUbicacion" onclick="obtenerUbicacion()">
+                                <i class="bi bi-geo-alt-fill"></i> Obtener mi ubicación GPS
+                            </button>
+                            <div id="locationStatus" class="mt-2" style="display: none;"></div>
+                        </div>
+
+                        <!-- Evidencia (foto/video) -->
+                        <div class="mb-3">
+                            <label for="{{ form.evidencia.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-camera"></i> Foto o Video (opcional)
+                            </label>
+                            {{ form.evidencia }}
+                            {% if form.evidencia.errors %}
+                                <div class="text-danger">{{ form.evidencia.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                Sube una foto o video del problema para ayudar a resolverlo más rápido
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Nota:</strong> Los campos marcados con * son obligatorios. 
+                            Tu reporte será revisado por las autoridades y asignado a un técnico.
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Crear Reporte
+                            </button>
+                            <a href="{% url 'usuarios:ciudadano_home' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Ayuda -->
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-question-circle"></i> Consejos para un buen reporte
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="small mb-0">
+                        <li>Describe claramente el problema que encontraste</li>
+                        <li>Incluye la ubicación exacta o lo más precisa posible</li>
+                        <li>Si puedes, toma fotos o videos del problema</li>
+                        <li>Usa la función GPS para mayor precisión</li>
+                        <li>Cuanto más detallada sea tu información, más rápido se atenderá</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio - Monitoreo de Calles Barranquilla{% endblock %}
+
+{% block main_class %}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Sistema de Monitoreo de Calles</h1>
+                <p class="lead mb-4">
+                    Ayuda a mejorar la infraestructura vial de Barranquilla reportando 
+                    fallas en las calles de tu sector.
+                </p>
+                <div class="d-grid gap-2 d-md-flex">
+                    <a href="{% url 'usuarios:registro' %}" class="btn btn-light btn-lg px-4">
+                        <i class="bi bi-person-plus"></i> Registrarse
+                    </a>
+                    <a href="{% url 'reportes:mapa' %}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-map"></i> Ver Mapa
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center mt-4 mt-lg-0">
+                <i class="bi bi-geo-alt-fill" style="font-size: 200px; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Estadísticas -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center g-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-file-earmark-text text-primary" style="font-size: 3rem;"></i>
+                        <h3 class="mt-3 mb-0">{{ reportes_count }}</h3>
+                        <p class="text-muted">Reportes Totales</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-people text-success" style="font-size: 3rem;"></i>
+                        <h3 class="mt-3 mb-0">{{ ciudadanos_count }}</h3>
+                        <p class="text-muted">Ciudadanos Activos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-check-circle text-info" style="font-size: 3rem;"></i>
+                        <h3 class="mt-3 mb-0">{{ casos_resueltos }}</h3>
+                        <p class="text-muted">Casos Resueltos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-tools text-warning" style="font-size: 3rem;"></i>
+                        <h3 class="mt-3 mb-0">{{ tecnicos_count }}</h3>
+                        <p class="text-muted">Técnicos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Cómo Funciona -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">¿Cómo Funciona?</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-1-circle-fill" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h4>Regístrate</h4>
+                        <p class="text-muted">
+                            Crea tu cuenta de forma rápida y sencilla. 
+                            Solo necesitas un correo electrónico.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-2-circle-fill" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h4>Reporta</h4>
+                        <p class="text-muted">
+                            Encuentra una falla en la calle? Repórtala con fotos, 
+                            ubicación GPS y descripción.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-3-circle-fill" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h4>Seguimiento</h4>
+                        <p class="text-muted">
+                            Recibe notificaciones sobre el estado de tu reporte 
+                            hasta que sea resuelto.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="mb-4">¿Listo para contribuir?</h2>
+        <p class="lead mb-4">
+            Únete a miles de barranquilleros que están ayudando a mejorar nuestra ciudad.
+        </p>
+        <a href="{% url 'usuarios:registro' %}" class="btn btn-light btn-lg px-5">
+            <i class="bi bi-person-plus"></i> Crear Cuenta Gratis
+        </a>
+    </div>
+</section>
+{% endblock %}

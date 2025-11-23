@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestionar Reporte #{{ reporte.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Botón volver -->
+    <div class="mb-3">
+        <a href="{% url 'usuarios:tecnico_home' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a Mis Asignaciones
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- COLUMNA IZQUIERDA: Info + Evidencias -->
+        <div class="col-lg-5">
+            <!-- Card de Información -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Reporte #{{ reporte.id }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h4 class="mb-2">{{ reporte.titulo }}</h4>
+                    <p class="text-muted mb-3">{{ reporte.descripcion }}</p>
+                    
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Tipo</small>
+                            <span class="badge bg-secondary">{{ reporte.get_tipo_display }}</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Estado</small>
+                            <span class="badge badge-estado-{{ reporte.estado.nombre|lower|cut:' ' }}">
+                                {{ reporte.estado.nombre }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Prioridad</small>
+                            <span class="badge badge-prioridad-{{ reporte.prioridad.nombre|lower }}">
+                                {{ reporte.prioridad.nombre }}
+                            </span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Fecha</small>
+                            <small>{{ reporte.reportado_en|date:"d/m/Y" }}</small>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted"><i class="bi bi-geo-alt"></i> Ubicación:</small><br>
+                        <small>{{ reporte.direccion }}</small>
+                    </div>
+                    
+                    <div class="mb-0">
+                        <small class="text-muted"><i class="bi bi-person"></i> Reportado por:</small><br>
+                        <small>{{ reporte.usuario.get_full_name|default:reporte.usuario.username }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evidencias del Ciudadano -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-images"></i> Evidencias del Ciudadano
+                    </h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="row g-2">
+                        {% for evidencia in reporte.evidencias.all %}
+                            {% if not evidencia.es_evidencia_reparacion %}
+                                <div class="col-6">
+                                    <div class="card h-100 border">
+                                        {% if evidencia.tipo_evidencia == 'foto' %}
+                                            <a href="{{ evidencia.archivo.url }}" target="_blank">
+                                                <img src="{{ evidencia.archivo.url }}" 
+                                                     class="card-img-top" 
+                                                     alt="Evidencia"
+                                                     style="height: 150px; object-fit: cover; cursor: pointer;">
+                                            </a>
+                                        {% elif evidencia.tipo_evidencia == 'video' %}
+                                            <video controls class="card-img-top" style="height: 150px; object-fit: cover;">
+                                                <source src="{{ evidencia.archivo.url }}" type="video/mp4">
+                                            </video>
+                                        {% else %}
+                                            <div class="card-body text-center p-2">
+                                                <i class="bi bi-file-earmark" style="font-size: 2rem; color: #6c757d;"></i>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="card-footer p-2 bg-light">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted" style="font-size: 0.7rem;">
+                                                    <i class="bi bi-person"></i> Ciudadano
+                                                    <br>{{ evidencia.fechaSubida|date:"d/m/Y" }}
+                                                </small>
+                                                <a href="{{ evidencia.archivo.url }}" 
+                                                   download 
+                                                   class="btn btn-sm btn-primary py-0 px-1">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    
+                    {% if not reporte.evidencias.all %}
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i> El ciudadano no subió evidencias
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Evidencias de Reparación (Técnico) -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-tools"></i> Mis Evidencias de Reparación
+                    </h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="row g-2">
+                        {% for evidencia in reporte.evidencias.all %}
+                            {% if evidencia.es_evidencia_reparacion %}
+                                <div class="col-6">
+                                    <div class="card h-100 border border-success">
+                                        {% if evidencia.tipo_evidencia == 'foto' %}
+                                            <a href="{{ evidencia.archivo.url }}" target="_blank">
+                                                <img src="{{ evidencia.archivo.url }}" 
+                                                     class="card-img-top" 
+                                                     alt="Evidencia de reparación"
+                                                     style="height: 150px; object-fit: cover; cursor: pointer;">
+                                            </a>
+                                        {% elif evidencia.tipo_evidencia == 'video' %}
+                                            <video controls class="card-img-top" style="height: 150px; object-fit: cover;">
+                                                <source src="{{ evidencia.archivo.url }}" type="video/mp4">
+                                            </video>
+                                        {% else %}
+                                            <div class="card-body text-center p-2">
+                                                <i class="bi bi-file-earmark" style="font-size: 2rem; color: #198754;"></i>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="card-footer p-2 bg-success bg-opacity-10">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted" style="font-size: 0.7rem;">
+                                                    <i class="bi bi-tools"></i> Técnico
+                                                    <br>{{ evidencia.fechaSubida|date:"d/m/Y H:i" }}
+                                                </small>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ evidencia.archivo.url }}" 
+                                                       download 
+                                                       class="btn btn-success py-0 px-2"
+                                                       data-bs-toggle="tooltip"
+                                                       title="Descargar">
+                                                        <i class="bi bi-download"></i>
+                                                    </a>
+                                                    {% if evidencia.subida_por and evidencia.subida_por.id == request.user.id %}
+                                                    <a href="{% url 'usuarios:borrar_evidencia_reparacion' evidencia.pk %}" 
+                                                       class="btn btn-danger py-0 px-2"
+                                                       data-bs-toggle="tooltip"
+                                                       title="Eliminar"
+                                                       onclick="return confirm('¿Estás seguro de eliminar esta evidencia?');">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: Formulario y Acciones -->
+        <div class="col-lg-7">
+            <!-- Formulario de Actualización -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-arrow-repeat"></i> Marcar como Resuelto
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" id="formActualizarReporte">
+                        {% csrf_token %}
+                        
+                        <input type="hidden" name="estado" value="{% for estado in estados %}{% if estado.nombre == 'Resuelto' %}{{ estado.id }}{% endif %}{% endfor %}">
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="tiempo_empleado" class="form-label fw-bold">
+                                    <i class="bi bi-clock"></i> Tiempo Empleado
+                                </label>
+                                <input type="text" class="form-control" id="tiempo_empleado" 
+                                       name="tiempo_empleado" 
+                                       placeholder="Ej: 2 horas">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="materiales_usados" class="form-label fw-bold">
+                                    <i class="bi bi-tools"></i> Materiales Usados
+                                </label>
+                                <input type="text" class="form-control" id="materiales_usados" 
+                                       name="materiales_usados" 
+                                       placeholder="Ej: Asfalto, cemento...">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="comentarios" class="form-label fw-bold">
+                                <i class="bi bi-chat-left-text"></i> Comentarios u Observaciones *
+                            </label>
+                            <textarea class="form-control" id="comentarios" name="comentarios" rows="4" 
+                                      placeholder="Describe el trabajo realizado, problemas encontrados o recomendaciones..." required
+                                      onkeyup="validarFormulario()"></textarea>
+                            <small class="text-danger" id="errorComentarios" style="display: none;">
+                                Debes agregar comentarios sobre el trabajo realizado (mínimo 10 caracteres)
+                            </small>
+                        </div>
+
+                        <hr>
+
+                        <!-- Sección de Evidencias -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-camera-fill"></i> Evidencia de Reparación *
+                            </label>
+                            
+                            <!-- Mostrar evidencias ya subidas -->
+                            {% if evidencias_previas_count > 0 %}
+                                <div class="alert alert-success mb-3">
+                                    <i class="bi bi-check-circle"></i> Ya has subido {{ evidencias_previas_count }} evidencia(s) de reparación
+                                </div>
+                            {% endif %}
+
+                            <!-- Subir nueva evidencia -->
+                            <input type="file" 
+                                   class="form-control" 
+                                   id="evidencia" 
+                                   name="evidencia" 
+                                   accept="image/*,video/*"
+                                   onchange="validarFormulario(); previsualizarArchivo()">
+                            <div class="form-text">
+                                Sube una foto o video del trabajo completado (JPG, PNG, MP4)
+                            </div>
+                            <small class="text-danger" id="errorEvidencia" style="display: none;">
+                                Debes subir al menos una evidencia de la reparación
+                            </small>
+
+                            <!-- Preview de la imagen -->
+                            <div id="previewContainer" style="display: none;" class="mt-2">
+                                <img id="previewImage" class="img-thumbnail" style="max-height: 150px;">
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            <strong>Importante:</strong>
+                            <ul class="mb-0 mt-2 small">
+                                <li>Debes agregar comentarios sobre el trabajo realizado</li>
+                                <li>Debes subir evidencia fotográfica de la reparación</li>
+                                <li>El ciudadano será notificado automáticamente</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg" id="btnActualizar" disabled>
+                                <i class="bi bi-check-circle"></i> Marcar como Resuelto
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Historial de Cambios -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Historial de Cambios
+                    </h6>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if reporte.historial.exists %}
+                        {% for registro in reporte.historial.all %}
+                        <div class="border-start border-primary border-3 ps-3 pb-3 mb-3">
+                            <h6 class="mb-1">
+                                <i class="bi bi-circle-fill text-primary" style="font-size: 0.5rem;"></i>
+                                {{ registro.accion }}
+                            </h6>
+                            <small class="text-muted d-block mb-2">
+                                <i class="bi bi-person"></i> {{ registro.usuario.username|default:"Sistema" }} • 
+                                <i class="bi bi-calendar"></i> {{ registro.fecha_accion|date:"d/m/Y H:i" }}
+                            </small>
+                            <p class="mb-0 small" style="white-space: pre-line;">{{ registro.detalles }}</p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center mb-0">No hay historial disponible.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Validar formulario en tiempo real
+function validarFormulario() {
+    const comentarios = document.getElementById('comentarios').value.trim();
+    const evidencia = document.getElementById('evidencia').files.length;
+    const btnActualizar = document.getElementById('btnActualizar');
+    const errorComentarios = document.getElementById('errorComentarios');
+    const errorEvidencia = document.getElementById('errorEvidencia');
+    
+    // Obtener el conteo de evidencias previas desde el servidor
+    const evidenciasPrevias = {{ evidencias_previas_count|default:0 }};
+    
+    let valido = true;
+    
+    // Validar comentarios
+    if (comentarios.length < 10) {
+        errorComentarios.style.display = 'block';
+        valido = false;
+    } else {
+        errorComentarios.style.display = 'none';
+    }
+    
+    // Validar evidencia (nueva o previa)
+    if (evidencia === 0 && evidenciasPrevias === 0) {
+        errorEvidencia.style.display = 'block';
+        valido = false;
+    } else {
+        errorEvidencia.style.display = 'none';
+    }
+    
+    btnActualizar.disabled = !valido;
+}
+
+// Previsualizar imagen
+function previsualizarArchivo() {
+    const file = document.getElementById('evidencia').files[0];
+    const preview = document.getElementById('previewImage');
+    const container = document.getElementById('previewContainer');
+    
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            container.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+// Validar al cargar la página
+document.addEventListener('DOMContentLoaded', validarFormulario);
+</script>
+{% endblock %}

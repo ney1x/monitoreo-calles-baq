@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle Reporte #{{ reporte.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Botón volver -->
+    <div class="mb-3">
+        <a href="{% url 'usuarios:ciudadano_home' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Inicio
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- COLUMNA IZQUIERDA: Información del Reporte -->
+        <div class="col-lg-8">
+            <!-- Card Principal -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-earmark-text"></i> Reporte #{{ reporte.id }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h3 class="mb-2">{{ reporte.titulo }}</h3>
+                            <span class="badge bg-secondary me-2">{{ reporte.get_tipo_display }}</span>
+                            <span class="badge badge-prioridad-{{ reporte.prioridad.nombre|lower }}">
+                                {{ reporte.prioridad.nombre }}
+                            </span>
+                            <span class="badge badge-estado-{{ reporte.estado.nombre|lower|cut:' ' }} ms-2">
+                                {{ reporte.estado.nombre }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-card-text"></i> Descripción</h6>
+                        <p class="text-muted">{{ reporte.descripcion }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-geo-alt"></i> Ubicación</h6>
+                        <p class="text-muted mb-2">{{ reporte.direccion }}</p>
+                        {% if reporte.latitud and reporte.longitud %}
+                        <small class="text-muted">
+                            Coordenadas: {{ reporte.latitud }}, {{ reporte.longitud }}
+                        </small>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6><i class="bi bi-calendar"></i> Fecha de Reporte</h6>
+                            <p class="text-muted">{{ reporte.reportado_en|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6><i class="bi bi-clock"></i> Última Actualización</h6>
+                            <p class="text-muted">{{ reporte.actualizado_en|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+
+                    {% if reporte.asignaciones.exists %}
+                    <hr>
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-person-check"></i> Técnico Asignado</h6>
+                        {% with asignacion=reporte.asignaciones.last %}
+                        <p class="mb-1">
+                            <strong>{{ asignacion.tecnico.get_full_name|default:asignacion.tecnico.username }}</strong>
+                        </p>
+                        <small class="text-muted">
+                            Asignado el {{ asignacion.fecha_asignacion|date:"d/m/Y H:i" }}
+                        </small>
+                        {% if asignacion.notas %}
+                        <p class="mb-0 mt-2"><strong>Notas:</strong> {{ asignacion.notas }}</p>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Evidencias -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-images"></i> Evidencias ({{ reporte.evidencias.count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if reporte.evidencias.exists %}
+                    <div class="row g-3">
+                        {% for evidencia in reporte.evidencias.all %}
+                        <div class="col-md-4 col-sm-6">
+                            <div class="card h-100 {% if evidencia.es_evidencia_reparacion %}border-success{% else %}border{% endif %}">
+                                {% if evidencia.tipo_evidencia == 'foto' %}
+                                    <a href="{{ evidencia.archivo.url }}" target="_blank">
+                                        <img src="{{ evidencia.archivo.url }}" 
+                                             class="card-img-top" 
+                                             alt="Evidencia"
+                                             style="height: 200px; object-fit: cover; cursor: pointer;">
+                                    </a>
+                                {% elif evidencia.tipo_evidencia == 'video' %}
+                                    <video controls class="card-img-top" style="height: 200px; object-fit: cover;">
+                                        <source src="{{ evidencia.archivo.url }}" type="video/mp4">
+                                    </video>
+                                {% else %}
+                                    <div class="card-body text-center">
+                                        <i class="bi bi-file-earmark" style="font-size: 3rem; color: #6c757d;"></i>
+                                        <p class="mb-0 mt-2 small">{{ evidencia.nombre_archivo }}</p>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="card-footer {% if evidencia.es_evidencia_reparacion %}bg-success bg-opacity-10{% else %}bg-light{% endif %}">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="bi bi-{% if evidencia.es_evidencia_reparacion %}tools{% else %}person{% endif %}"></i>
+                                            {% if evidencia.es_evidencia_reparacion %}
+                                                Reparación
+                                            {% else %}
+                                                Reporte inicial
+                                            {% endif %}
+                                            <br>{{ evidencia.fechaSubida|date:"d/m/Y H:i" }}
+                                        </small>
+                                        <a href="{{ evidencia.archivo.url }}" 
+                                           download 
+                                           class="btn btn-sm {% if evidencia.es_evidencia_reparacion %}btn-success{% else %}btn-primary{% endif %}">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i> No hay evidencias disponibles para este reporte.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Historial -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Historial de Cambios
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if reporte.historial.exists %}
+                    <div class="timeline">
+                        {% for registro in reporte.historial.all %}
+                        <div class="timeline-item">
+                            <h6 class="mb-1">{{ registro.accion }}</h6>
+                            <small class="text-muted d-block mb-2">
+                                <i class="bi bi-person"></i> {{ registro.usuario.username|default:"Sistema" }} • 
+                                <i class="bi bi-calendar"></i> {{ registro.fecha_accion|date:"d/m/Y H:i" }}
+                            </small>
+                            <p class="mb-0 small text-muted">{{ registro.detalles }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">No hay historial disponible.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: Acciones y Estadísticas -->
+        <div class="col-lg-4">
+    <!-- Información del Estado -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h6 class="mb-0">
+                <i class="bi bi-info-circle"></i> Estado del Reporte
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="text-center mb-3">
+                <span class="badge badge-estado-{{ reporte.estado.nombre|lower|cut:' ' }} fs-5 px-4 py-2">
+                    {{ reporte.estado.nombre }}
+                </span>
+            </div>
+            
+            <p class="small text-muted text-center">
+                {% if reporte.estado.nombre == 'Nuevo' %}
+                    Tu reporte ha sido recibido y está pendiente de revisión.
+                {% elif reporte.estado.nombre == 'En Revisión' %}
+                    Las autoridades están revisando tu reporte.
+                {% elif reporte.estado.nombre == 'Asignado' %}
+                    Un técnico ha sido asignado para atender tu reporte.
+                {% elif reporte.estado.nombre == 'En Proceso' %}
+                    El técnico está trabajando en la reparación.
+                {% elif reporte.estado.nombre == 'Resuelto' %}
+                    ¡Tu reporte ha sido resuelto! Gracias por tu colaboración.
+                {% elif reporte.estado.nombre == 'Rechazado' %}
+                    Tu reporte ha sido rechazado. Revisa las notas del historial.
+                {% endif %}
+            </p>
+
+            <hr>
+
+            <div class="small">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Prioridad:</span>
+                    <span class="badge badge-prioridad-{{ reporte.prioridad.nombre|lower }}">
+                        {{ reporte.prioridad.nombre }}
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Tipo:</span>
+                    <span>{{ reporte.get_tipo_display }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Evidencias:</span>
+                    <span>{{ reporte.evidencias.count }}</span>
+                </div>
+            </div>
+
+            {% if reporte.latitud and reporte.longitud %}
+            <hr>
+            <div class="d-grid">
+                <a href="https://www.google.com/maps?q={{ reporte.latitud }},{{ reporte.longitud }}" 
+                   target="_blank" 
+                   class="btn btn-outline-primary">
+                    <i class="bi bi-map"></i> Ver en Google Maps
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--primary-color);
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 45px;
+    margin-bottom: 25px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px var(--primary-color);
+}
+</style>
+{% endblock %}

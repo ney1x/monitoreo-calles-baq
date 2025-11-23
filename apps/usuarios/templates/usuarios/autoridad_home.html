@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Autoridad{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2">
+                <i class="bi bi-shield-check"></i> Panel de Autoridad
+            </h1>
+            <p class="text-muted">Supervisa y gestiona todos los reportes del sistema</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'reportes:lista_reportes_autoridad' %}" class="btn btn-primary">
+                <i class="bi bi-list-ul"></i> Ver Todos los Reportes
+            </a>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Total Reportes</p>
+                            <h2 class="number mb-0">{{ estadisticas.total }}</h2>
+                        </div>
+                        <i class="bi bi-file-earmark-text icon text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Sin Asignar</p>
+                            <h2 class="number mb-0 text-warning">{{ estadisticas.sin_asignar }}</h2>
+                        </div>
+                        <i class="bi bi-exclamation-triangle icon text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">En Proceso</p>
+                            <h2 class="number mb-0 text-info">{{ estadisticas.en_proceso }}</h2>
+                        </div>
+                        <i class="bi bi-gear-fill icon text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Resueltos</p>
+                            <h2 class="number mb-0 text-success">{{ estadisticas.resueltos }}</h2>
+                        </div>
+                        <i class="bi bi-check-circle-fill icon text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reportes Pendientes -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Reportes Pendientes de Asignación
+                    </h5>
+                    <a href="{% url 'reportes:lista_reportes_autoridad' %}" class="btn btn-light btn-sm">
+                        Ver Todos
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if reportes_recientes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#ID</th>
+                                        <th>Título</th>
+                                        <th>Ubicación</th>
+                                        <th>Prioridad</th>
+                                        <th>Estado</th>
+                                        <th>Fecha</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for reporte in reportes_recientes %}
+                                    <tr>
+                                        <td><strong>#{{ reporte.id }}</strong></td>
+                                        <td>
+                                            <strong>{{ reporte.titulo }}</strong><br>
+                                            <small class="text-muted">{{ reporte.get_tipo_display }}</small>
+                                        </td>
+                                        <td>
+                                            <i class="bi bi-geo-alt"></i>
+                                            <small>{{ reporte.direccion|truncatewords:8 }}</small>
+                                        </td>
+                                        <td>
+                                            {% if reporte.prioridad.nombre == 'Alta' or reporte.prioridad.nombre == 'Crítica' %}
+                                            <span class="badge bg-danger">{{ reporte.prioridad.nombre }}</span>
+                                            {% elif reporte.prioridad.nombre == 'Media' %}
+                                            <span class="badge bg-warning">Media</span>
+                                            {% else %}
+                                            <span class="badge bg-info">{{ reporte.prioridad.nombre }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-estado-{{ reporte.estado.nombre|lower|cut:' ' }}">
+                                                {{ reporte.estado.nombre }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small>{{ reporte.fechaCreacion|date:"d/m/Y" }}</small>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'reportes:asignar_tecnico' reporte.pk %}" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="bi bi-person-plus"></i> Asignar
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-check-circle" style="font-size: 4rem; color: #28a745;"></i>
+                            <h4 class="mt-3">¡Todo al día!</h4>
+                            <p class="text-muted">No hay reportes sin asignar en este momento</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

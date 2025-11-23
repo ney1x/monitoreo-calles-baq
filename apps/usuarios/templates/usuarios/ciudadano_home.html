@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Dashboard - Ciudadano{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2">
+                <i class="bi bi-house-door-fill"></i> Bienvenido, {{ user.first_name|default:user.username }}
+            </h1>
+            <p class="text-muted">Aquí puedes ver tus reportes y crear nuevos</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'reportes:crear_reporte' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-circle"></i> Crear Reporte
+            </a>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Mis Reportes</p>
+                            <h2 class="number mb-0">{{ estadisticas.total }}</h2>
+                        </div>
+                        <i class="bi bi-file-earmark-text icon text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Nuevos</p>
+                            <h2 class="number mb-0 text-info">{{ estadisticas.nuevos }}</h2>
+                        </div>
+                        <i class="bi bi-hourglass-split icon text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">En Proceso</p>
+                            <h2 class="number mb-0 text-warning">{{ estadisticas.en_proceso }}</h2>
+                        </div>
+                        <i class="bi bi-gear-fill icon text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Resueltos</p>
+                            <h2 class="number mb-0 text-success">{{ estadisticas.resueltos }}</h2>
+                        </div>
+                        <i class="bi bi-check-circle-fill icon text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reportes Recientes -->
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Mis Reportes Recientes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if mis_reportes %}
+                        <div class="list-group list-group-flush">
+                            {% for reporte in mis_reportes %}
+                            <a href="{% url 'reportes:detalle_reporte' reporte.pk %}" 
+                               class="list-group-item list-group-item-action reporte-item">
+                                <div class="d-flex w-100 justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <h6 class="mb-0 me-2">{{ reporte.titulo }}</h6>
+                                            <span class="badge badge-prioridad-{{ reporte.prioridad.nombre|lower }}">
+                                                {{ reporte.prioridad.nombre }}
+                                            </span>
+                                        </div>
+                                        <p class="mb-1 small text-muted">
+                                            <i class="bi bi-geo-alt"></i> {{ reporte.direccion|truncatewords:15 }}
+                                        </p>
+                                        <p class="mb-0 small">
+                                            <span class="badge badge-estado-{{ reporte.estado.nombre|lower|cut:' ' }}">
+                                                {{ reporte.estado.nombre }}
+                                            </span>
+                                            <span class="text-muted ms-2">
+                                                <i class="bi bi-calendar"></i> {{ reporte.reportado_en|date:"d/m/Y" }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <i class="bi bi-chevron-right text-muted"></i>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox" style="font-size: 4rem; opacity: 0.3;"></i>
+                            <p class="text-muted mt-3">No has creado ningún reporte todavía</p>
+                            <a href="{% url 'reportes:crear_reporte' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Crear Mi Primer Reporte
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning-fill"></i> Acciones Rápidas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'reportes:crear_reporte' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Crear Reporte
+                        </a>
+                        <a href="{% url 'reportes:mapa' %}" class="btn btn-outline-success">
+                            <i class="bi bi-map"></i> Ver Mapa
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle-fill"></i> ¿Sabías que...?
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="small mb-0 ps-3">
+                        <li class="mb-2">Puedes agregar fotos a tus reportes para acelerar la atención</li>
+                        <li class="mb-2">Recibirás notificaciones cuando cambien el estado de tus reportes</li>
+                        <li class="mb-2">Tus reportes ayudan a mejorar las calles de Barranquilla</li>
+                        <li>Puedes ver todos los reportes de la ciudad en el mapa</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
