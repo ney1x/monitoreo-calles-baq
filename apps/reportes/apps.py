@@ -6,4 +6,6 @@ class ReportesConfig(AppConfig):
     name = 'apps.reportes'
 
     def ready(self):
-        import apps.reportes.signals
+        import apps.reportes.duplicate_detector
+        from . import duplicate_detector
+        from . import signals

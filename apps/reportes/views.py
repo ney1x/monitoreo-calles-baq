@@ -4,7 +4,8 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
 from .forms import ReporteForm, EvidenciaForm
-from .models import Reporte, EstadoReporte, PrioridadReporte, Evidencia
+from .models import Reporte, EstadoReporte, PrioridadReporte, Evidencia, GrupoDuplicado
+from .duplicate_detector import DetectorDuplicados
 import os
 
 
@@ -261,3 +262,138 @@ def crear_reporte_desde_mapa(request):
         return redirect(f"/reportes/mapa/?nuevo={reporte.id}&lat={latitud}&lng={longitud}")
     
     return redirect('reportes:mapa')
+
+# REPORTES DUPLICADOS 
+
+@login_required
+def ver_grupos_duplicados(request):
+    """Vista para ver todos los grupos de duplicados (solo autoridades)"""
+    
+    if request.user.rol.nombre not in ['Autoridad', 'Administrador']:
+        messages.error(request, 'No tienes permisos para ver esta página.')
+        return redirect('usuarios:home')
+    
+    # Obtener todos los grupos con sus reportes
+    grupos = GrupoDuplicado.objects.prefetch_related(
+        'reportes__usuario',
+        'reportes__estado',
+        'reportes__prioridad'
+    ).order_by('-fechaDeteccion')
+    
+    # Calcular estadísticas para cada grupo
+    grupos_con_stats = []
+    for grupo in grupos:
+        stats = DetectorDuplicados.obtener_estadisticas_grupo(grupo)
+        grupos_con_stats.append({
+            'grupo': grupo,
+            'stats': stats
+        })
+    
+    context = {
+        'grupos_con_stats': grupos_con_stats,
+        'total_grupos': grupos.count(),
+    }
+    
+    return render(request, 'reportes/grupos_duplicados.html', context)
+
+
+@login_required
+def detalle_grupo_duplicado(request, pk):
+    """Vista detallada de un grupo de duplicados"""
+    
+    grupo = get_object_or_404(GrupoDuplicado, pk=pk)
+    stats = DetectorDuplicados.obtener_estadisticas_grupo(grupo)
+    principal = DetectorDuplicados.obtener_reporte_principal(grupo)
+    reportes = grupo.reportes.all().order_by('reportado_en')
+    
+    context = {
+        'grupo': grupo,
+        'stats': stats,
+        'principal': principal,
+        'reportes': reportes,
+    }
+    
+    return render(request, 'reportes/detalle_grupo_duplicado.html', context)
+
+
+@login_required
+def desmarcar_duplicado(request, pk):
+    """Desmarca un reporte como duplicado (solo autoridades)"""
+    
+    if request.user.rol.nombre not in ['Autoridad', 'Administrador']:
+        messages.error(request, 'No tienes permisos para realizar esta acción.')
+        return redirect('usuarios:home')
+    
+    reporte = get_object_or_404(Reporte, pk=pk)
+    
+    if request.method == 'POST':
+        grupo_id = reporte.grupoDuplicado.id if reporte.grupoDuplicado else None
+        
+        # Desmarcar
+        reporte.duplicado = False
+        reporte.grupoDuplicado = None
+        reporte.save()
+        
+        # Registrar en historial
+        from apps.reportes.models import HistorialReporte
+        HistorialReporte.objects.create(
+            reporte=reporte,
+            usuario=request.user,
+            accion='Desmarcado como duplicado',
+            detalles=f'El reporte fue desmarcado como duplicado por {request.user.username}'
+        )
+        
+        messages.success(request, f'Reporte #{reporte.id} desmarcado como duplicado.')
+        
+        # Si el grupo quedó vacío, eliminarlo
+        if grupo_id:
+            grupo = GrupoDuplicado.objects.filter(id=grupo_id).first()
+            if grupo and grupo.reportes.count() == 0:
+                grupo.delete()
+        
+        return redirect('reportes:detalle_reporte', pk=reporte.pk)
+    
+    return render(request, 'reportes/confirmar_desmarcar_duplicado.html', {
+        'reporte': reporte
+    })
+
+
+@login_required
+def ejecutar_deteccion_duplicados(request):
+    """Ejecuta detección de duplicados manualmente (solo autoridades)"""
+    
+    if request.user.rol.nombre not in ['Autoridad', 'Administrador']:
+        messages.error(request, 'No tienes permisos para realizar esta acción.')
+        return redirect('usuarios:home')
+    
+    if request.method == 'POST':
+        # Obtener parámetros
+        radio = float(request.POST.get('radio', 0.05))
+        dias = int(request.POST.get('dias', 7))
+        
+        # Actualizar configuración
+        DetectorDuplicados.RADIO_BUSQUEDA_KM = radio
+        DetectorDuplicados.VENTANA_TEMPORAL_DIAS = dias
+        
+        # Obtener reportes no marcados con coordenadas
+        reportes = Reporte.objects.filter(
+            latitud__isnull=False,
+            longitud__isnull=False,
+            duplicado=False
+        ).order_by('reportado_en')
+        
+        duplicados_encontrados = 0
+        for reporte in reportes:
+            es_duplicado, _ = DetectorDuplicados.detectar_y_marcar_duplicado(reporte)
+            if es_duplicado:
+                duplicados_encontrados += 1
+        
+        messages.success(
+            request,
+            f'Detección completada: {duplicados_encontrados} duplicados encontrados de {reportes.count()} reportes'
+        )
+        
+        return redirect('reportes:grupos_duplicados')
+    
+    return render(request, 'reportes/ejecutar_deteccion.html')
+

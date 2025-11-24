@@ -26,4 +26,9 @@ urlpatterns = [
     # Crear reporte desde mapa
     path('crear-desde-mapa/', views.crear_reporte_desde_mapa, name='crear_reporte_desde_mapa'),
 
+    path('duplicados/', views.ver_grupos_duplicados, name='grupos_duplicados'),
+    path('duplicados/<int:pk>/', views.detalle_grupo_duplicado, name='detalle_grupo_duplicado'),
+    path('duplicados/detectar/', views.ejecutar_deteccion_duplicados, name='ejecutar_deteccion'),
+    path('desmarcar-duplicado/<int:pk>/', views.desmarcar_duplicado, name='desmarcar_duplicado'),
+
 ]
